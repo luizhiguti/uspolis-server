@@ -1,9 +1,9 @@
 from flask import Flask
-from flask_restful import Api
+from flask_cors import CORS
 
-from src.blueprints.classrom_blueprint import classrom_blueprint
+from src.blueprints.classroom_blueprint import classroom_blueprint
 
 app = Flask(__name__)
-api = Api(app)
+CORS(app)
 
-app.register_blueprint(classrom_blueprint)
+app.register_blueprint(classroom_blueprint)
