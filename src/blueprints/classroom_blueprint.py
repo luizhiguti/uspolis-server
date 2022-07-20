@@ -14,7 +14,7 @@ classrooms = database["classrooms"]
 classroom_schema = ClassroomSchema()
 
 @classroom_blueprint.route("")
-def get_classroom():
+def get_all_classrooms():
   result = classrooms.find({}, { "_id" : 0 })
   resultList = list(result)
 
@@ -37,7 +37,7 @@ def create_classroom():
     return { "message" : err.messages }, 400
 
 @classroom_blueprint.route("/<name>", methods=["GET", "DELETE", "PUT"])
-def get_classroom_by_name(name):
+def classroom_by_name(name):
   query = { "classroom_name" : name }
   try:
     if request.method == "GET":
