@@ -2,3 +2,6 @@ flask
 flask-cors
 marshmallow
 pymongo
+numpy
+bs4
+requests

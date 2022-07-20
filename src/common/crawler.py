@@ -1,69 +1,108 @@
 import requests
 from bs4 import BeautifulSoup
+import numpy as np
 
-def parse_horizontal_table(table, row_names=[]):
+
+def get_jupiter_class_infos(class_code):
+    URL = f"https://uspdigital.usp.br/jupiterweb/obterTurma?nomdis=&sgldis={class_code}"
+    table1_names = ['cod_turma', 'inicio', 'fim', 'tipo', 'obs']
+    table2_names = ['dia_semana', 'hora_inicio', 'hora_fim', 'prof']
+    table3_names = ['tipo_vaga', 'vagas', 'inscritos', 'pendentes', 'matriculados']
+
+    # attributes used to identify the <div>s containing the classes informations
+    class_div_attr = {
+        "style" : "border: 2px solid #658CCF; padding: 5px; border-radius: 5px;"
+    }
+    table3_filter = {
+        'tag' : 'span', 
+        'attrs' : {'class' : 'txt_arial_8pt_black'}
+    }
+
+    page = requests.get(URL)
+    soup = BeautifulSoup(page.content, "html.parser")
+
+    out = []
+
+    class_div = soup.find_all("div", attrs=class_div_attr)
+
+    for c_info in class_div:
+
+        info_table = c_info.find_all("table")
+
+        info1 = parse_table(info_table[0], orientation='hor', labels=table1_names)
+        info2 = parse_table(info_table[1], orientation='vert', labels=table2_names)
+        info3 = parse_table(info_table[2], orientation='vert', labels=table3_names, filter=table3_filter)
+
+        out.append(
+            {
+                'cod_turma' : info1['cod_turma'][0],
+                'inicio' : info1['inicio'][0],
+                'fim' : info1['fim'][0],
+                'tipo' : info1['tipo'][0],
+                #'obs' : info1['obs'][0],
+                'prof' : info2['prof'],
+                'dia_semana' : info2['dia_semana'][0],
+                'hora_inicio' : info2['hora_inicio'][0],
+                'hora_fim' : info2['hora_fim'][0],
+                'vagas' : np.array( [int(x) for x in info3['vagas']] ),
+                'inscritos' : np.array( [int(x) for x in info3['inscritos']] ),
+                'pendentes' : np.array( [int(x) for x in info3['pendentes']] )
+            }
+        )
+
+
+    return out
+
+def parse_table(table, orientation='vert', labels=[], filter=None):
+    if orientation == 'vert':
+        return parse_vertical_table(table, labels, filter)
+    elif orientation == 'hor':
+        return parse_horizontal_table(table, labels, filter)
+
+
+def parse_horizontal_table(table, labels=[], filter=None):
     out_dict = {}
     rows = table.find_all("tr")
 
     for i in range(len(rows)):
-        data = rows[i].find_all("td")
-        if i < len(row_names):
-            name = row_names[i]
+        if filter == None:
+            data = rows[i].find_all("td")
         else:
-            name = data[0].get_text(strip=True)
-        out_dict[name] = [val.get_text(strip=True) for val in data[1:]]
+            data = rows[i].find_all(filter['tag'], attrs=filter['attrs'])
+
+        out_dict[labels[i]] = [val.get_text(strip=True) for val in data[1:] if (val.get_text(strip=True) != '')] 
 
     return out_dict
 
 
 
 
-def parse_vertical_table(table, col_names=[]):
+def parse_vertical_table(table, labels=[], filter=None):
     out_dict = {}
     rows = table.find_all("tr")
 
     names=[]
+    for col in labels:
+        out_dict[col] = []
 
-    for i in range(len(rows)):
-        data = rows[i].find_all("td")
-        if i == 0:
-            for j in range(len(data)):
-                if j < len(col_names):
-                    names.append(col_names[j])
-                else:
-                    names.append(data[j].get_text(strip=True))
-
-                out_dict[names[j]] = []
+    for i in range(1, len(rows)): #skip the first row of labels
+        if filter == None:
+            data = rows[i].find_all("td")
         else:
-            for j in range(len(data)):
-                out_dict[names[j]].append(data[j].get_text(strip=True))
+            data = rows[i].find_all(filter['tag'], attrs=filter['attrs'])
+
+
+        for j in range(len(data)):
+            
+            data_text = data[j].get_text(strip=True)
+            if data_text != '':
+                out_dict[labels[j]].append(data_text)
 
     return out_dict 
 
 
 
 
-URL = "https://uspdigital.usp.br/jupiterweb/obterTurma?nomdis=&sgldis=PCS3559"
-page = requests.get(URL)
-
-#print(page.text)
-
-soup = BeautifulSoup(page.content, "html.parser")
-
-class_infos_attr = {
-    "style" : "border: 2px solid #658CCF; padding: 5px; border-radius: 5px;"
-}
-
-class_infos = soup.find_all("div", attrs=class_infos_attr)
-row_names = ['cod_turma', 'inicio', 'fim', 'tipo', 'obs']
-col_names = ['dia_semana', 'hora_inicio', 'hora_fim', 'prof']
-
-for c_info in class_infos:
-
-    infos = c_info.find_all("table")
-
-    #print(parse_horizontal_table(infos[0], row_names))
-    print(parse_vertical_table(infos[1], col_names))
 
 
 
