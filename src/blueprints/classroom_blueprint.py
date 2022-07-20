@@ -9,7 +9,7 @@ from src.schemas.classroom_schema import ClassroomSchema
 classroom_blueprint = Blueprint("classrooms", __name__, url_prefix="/api/classrooms")
 
 classrooms = database["classrooms"]
-classrooms.create_index("classroom", unique=True)
+# classrooms.create_index("classroom", unique=True)
 
 classroom_schema = ClassroomSchema()
 
@@ -38,7 +38,7 @@ def create_classroom():
 
 @classroom_blueprint.route("/<name>", methods=["GET", "DELETE", "PUT"])
 def get_classroom_by_name(name):
-  query = { "classroom" : name }
+  query = { "classroom_name" : name }
   try:
     if request.method == "GET":
       result = classrooms.find_one(query, { "_id" : 0 })
