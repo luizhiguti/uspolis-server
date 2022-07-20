@@ -1,10 +1,11 @@
 import requests
 from bs4 import BeautifulSoup
 import numpy as np
+import re
 
 
-def get_jupiter_class_infos(class_code):
-    URL = f"https://uspdigital.usp.br/jupiterweb/obterTurma?nomdis=&sgldis={class_code}"
+def get_jupiter_class_infos(subject_code):
+    URL = f"https://uspdigital.usp.br/jupiterweb/obterTurma?nomdis=&sgldis={subject_code}"
     table1_names = ['cod_turma', 'inicio', 'fim', 'tipo', 'obs']
     table2_names = ['dia_semana', 'hora_inicio', 'hora_fim', 'prof']
     table3_names = ['tipo_vaga', 'vagas', 'inscritos', 'pendentes', 'matriculados']
@@ -18,10 +19,13 @@ def get_jupiter_class_infos(class_code):
         'attrs' : {'class' : 'txt_arial_8pt_black'}
     }
 
+    out = []
+
     page = requests.get(URL)
     soup = BeautifulSoup(page.content, "html.parser")
 
-    out = []
+    subject = soup.find_all('b', text=re.compile('Disciplina:(.*)'))[0]
+    subject_name = subject.get_text().replace(f'Disciplina: {subject_code} - ', '')
 
     class_div = soup.find_all("div", attrs=class_div_attr)
 
@@ -35,6 +39,8 @@ def get_jupiter_class_infos(class_code):
 
         out.append(
             {
+                'cod_disciplina' : subject_code,
+                'nome_disciplina' : subject_name,
                 'cod_turma' : info1['cod_turma'][0],
                 'inicio' : info1['inicio'][0],
                 'fim' : info1['fim'][0],
