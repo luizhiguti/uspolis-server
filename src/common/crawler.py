@@ -47,9 +47,9 @@ def get_jupiter_class_infos(subject_code):
                 'tipo' : info1['tipo'][0],
                 #'obs' : info1['obs'][0],
                 'prof' : info2['prof'],
-                'dia_semana' : info2['dia_semana'][0],
-                'hora_inicio' : info2['hora_inicio'][0],
-                'hora_fim' : info2['hora_fim'][0],
+                'dia_semana' : info2['dia_semana'],
+                'hora_inicio' : info2['hora_inicio'],
+                'hora_fim' : info2['hora_fim'],
                 'vagas' : np.array( [int(x) for x in info3['vagas']] ),
                 'inscritos' : np.array( [int(x) for x in info3['inscritos']] ),
                 'pendentes' : np.array( [int(x) for x in info3['pendentes']] )
