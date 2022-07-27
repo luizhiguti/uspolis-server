@@ -47,5 +47,7 @@ def delete_subject(code):
 
     if not result: raise PyMongoError(f"{code} not found")
 
+    return dumps(result)
+
   except PyMongoError as err:
     return { "message" : err._message }, 400
