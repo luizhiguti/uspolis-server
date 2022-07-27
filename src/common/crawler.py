@@ -1,6 +1,5 @@
 import requests
 from bs4 import BeautifulSoup
-import numpy as np
 import re
 
 
@@ -50,9 +49,9 @@ def get_jupiter_class_infos(subject_code):
                 'dia_semana' : info2['dia_semana'],
                 'hora_inicio' : info2['hora_inicio'],
                 'hora_fim' : info2['hora_fim'],
-                'vagas' : np.array( [int(x) for x in info3['vagas']] ),
+                'vagas' : list( [int(x) for x in info3['vagas']] ),
                 'inscritos' : list( [int(x) for x in info3['inscritos']] ),
-                'pendentes' : np.array( [int(x) for x in info3['pendentes']] )
+                'pendentes' : list( [int(x) for x in info3['pendentes']] )
             }
         )
 

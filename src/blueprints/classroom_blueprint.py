@@ -9,9 +9,12 @@ from src.schemas.classroom_schema import ClassroomSchema
 classroom_blueprint = Blueprint("classrooms", __name__, url_prefix="/api/classrooms")
 
 classrooms = database["classrooms"]
+
+# classroom_name not unique
 # classrooms.create_index("classroom", unique=True)
 
 classroom_schema = ClassroomSchema()
+
 
 @classroom_blueprint.route("")
 def get_all_classrooms():
@@ -19,6 +22,7 @@ def get_all_classrooms():
   resultList = list(result)
 
   return dumps(resultList)
+
 
 @classroom_blueprint.route("", methods=["POST"])
 def create_classroom():
@@ -35,6 +39,7 @@ def create_classroom():
 
   except ValidationError as err:
     return { "message" : err.messages }, 400
+
 
 @classroom_blueprint.route("/<name>", methods=["GET", "DELETE", "PUT"])
 def classroom_by_name(name):

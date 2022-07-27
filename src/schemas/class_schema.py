@@ -16,6 +16,6 @@ class ClassSchema(Schema):
   start_period = fields.Str(data_key="inicio")
   end_period = fields.Str(data_key="fim")
   class_type = fields.Str(data_key="tipo")
-  vacancies = ArraySumField(data_key="vagass")
+  vacancies = ArraySumField(data_key="vagas")
   subscribers = ArraySumField(data_key="inscritos")
-  pendings = ArraySumField(data_key="pendentess")
+  pendings = ArraySumField(data_key="pendentes")
