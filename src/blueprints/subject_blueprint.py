@@ -13,12 +13,14 @@ subjects.create_index("subject_code", unique=True)
 
 subject_schema = SubjectSchema()
 
+
 @subject_blueprint.route("", methods=["GET"])
 def get_all_subjects():
   result = subjects.find({}, { "_id" : 0 })
   resultList = list(result)
 
   return dumps(resultList)
+
 
 @subject_blueprint.route("", methods=["POST"])
 def create_subject():
@@ -35,6 +37,7 @@ def create_subject():
 
   except ValidationError as err:
     return { "message" : err.messages }, 400
+
 
 @subject_blueprint.route("<code>", methods=["DELETE"])
 def delete_subject(code):

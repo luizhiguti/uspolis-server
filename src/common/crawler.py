@@ -1,6 +1,5 @@
 import requests
 from bs4 import BeautifulSoup
-import numpy as np
 import re
 
 
@@ -15,7 +14,7 @@ def get_jupiter_class_infos(subject_code):
         "style" : "border: 2px solid #658CCF; padding: 5px; border-radius: 5px;"
     }
     table3_filter = {
-        'tag' : 'span', 
+        'tag' : 'span',
         'attrs' : {'class' : 'txt_arial_8pt_black'}
     }
 
@@ -50,9 +49,9 @@ def get_jupiter_class_infos(subject_code):
                 'dia_semana' : info2['dia_semana'],
                 'hora_inicio' : info2['hora_inicio'],
                 'hora_fim' : info2['hora_fim'],
-                'vagas' : np.array( [int(x) for x in info3['vagas']] ),
-                'inscritos' : np.array( [int(x) for x in info3['inscritos']] ),
-                'pendentes' : np.array( [int(x) for x in info3['pendentes']] )
+                'vagas' : list( [int(x) for x in info3['vagas']] ),
+                'inscritos' : list( [int(x) for x in info3['inscritos']] ),
+                'pendentes' : list( [int(x) for x in info3['pendentes']] )
             }
         )
 
@@ -76,7 +75,7 @@ def parse_horizontal_table(table, labels=[], filter=None):
         else:
             data = rows[i].find_all(filter['tag'], attrs=filter['attrs'])
 
-        out_dict[labels[i]] = [val.get_text(strip=True) for val in data[1:] if (val.get_text(strip=True) != '')] 
+        out_dict[labels[i]] = [val.get_text(strip=True) for val in data[1:] if (val.get_text(strip=True) != '')]
 
     return out_dict
 
@@ -99,18 +98,8 @@ def parse_vertical_table(table, labels=[], filter=None):
 
 
         for j in range(len(data)):
-            
             data_text = data[j].get_text(strip=True)
             if data_text != '':
                 out_dict[labels[j]].append(data_text)
 
-    return out_dict 
-
-
-
-
-
-
-
-
-    
+    return out_dict
