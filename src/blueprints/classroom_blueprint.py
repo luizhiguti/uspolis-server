@@ -2,6 +2,7 @@ from flask import Blueprint, request
 from bson.json_util import dumps
 from marshmallow import ValidationError
 from pymongo.errors import DuplicateKeyError, PyMongoError
+from datetime import datetime
 
 from src.common.database import database
 from src.schemas.classroom_schema import ClassroomSchema
@@ -14,7 +15,6 @@ classrooms = database["classrooms"]
 # classrooms.create_index("classroom", unique=True)
 
 classroom_schema = ClassroomSchema()
-
 
 @classroom_blueprint.route("")
 def get_all_classrooms():
@@ -29,6 +29,8 @@ def create_classroom():
   try:
     classroom_schema.load(request.json)
     dict_request_body = request.json
+
+    dict_request_body['updated_at'] = datetime.now().strftime("%d/%m%Y %H:%M")
 
     result = classrooms.insert_one(dict_request_body)
 
@@ -53,7 +55,10 @@ def classroom_by_name(name):
 
     if request.method == "PUT":
       classroom_schema.load(request.json)
-      update_set = {"$set" : request.json }
+      dict_request_body = request.json
+      dict_request_body['updated_at'] = datetime.now().strftime("%d/%m%Y %H:%M")
+
+      update_set = {"$set" : dict_request_body }
       result = classrooms.update_one(query, update_set).modified_count
 
     if not result: raise PyMongoError(f"{name} not found")
