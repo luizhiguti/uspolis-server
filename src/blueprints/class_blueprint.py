@@ -26,19 +26,23 @@ def get_all_classes():
 
 @class_blueprint.route("many", methods=["POST"])
 def create_many_classes():
-  subject_codes_list = request.json
-  updated = []
-  inserted = []
+  try:
+    subject_codes_list = request.json
+    updated = []
+    inserted = []
 
-  for subject_code in subject_codes_list:
-    subject_classes = get_jupiter_class_infos(subject_code)
+    for subject_code in subject_codes_list:
+      subject_classes = get_jupiter_class_infos(subject_code)
 
-    for class_info in subject_classes:
-      schema_load = class_schema.load(class_info)
-      print("classcode", schema_load["class_code"])
-      query = { "class_code" : schema_load["class_code"], "subject_code" : schema_load["subject_code"] }
-      result = classes.update_one(query, { "$set" : schema_load }, upsert=True)
+      for class_info in subject_classes:
+        schema_load = class_schema.load(class_info)
 
-      updated.append(schema_load["subject_code"]) if result.matched_count else inserted.append(schema_load["subject_code"])
+        query = { "class_code" : schema_load["class_code"], "subject_code" : schema_load["subject_code"] }
+        result = classes.update_one(query, { "$set" : schema_load }, upsert=True)
 
-  return dumps({ "updated" : updated, "inserted" : inserted })
+        updated.append(schema_load["subject_code"]) if result.matched_count else inserted.append(schema_load["subject_code"])
+
+    return dumps({ "updated" : updated, "inserted" : inserted })
+
+  except:
+    return { "message" : f"Erro ao buscar informações das turmas - {subject_code}", "updated" : updated, "inserted" : inserted }, 400
