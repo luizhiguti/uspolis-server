@@ -49,9 +49,9 @@ def get_jupiter_class_infos(subject_code):
                 'dia_semana' : info2['dia_semana'],
                 'hora_inicio' : info2['hora_inicio'],
                 'hora_fim' : info2['hora_fim'],
-                'vagas' : list( [int(x) for x in info3['vagas']] ),
-                'inscritos' : list( [int(x) for x in info3['inscritos']] ),
-                'pendentes' : list( [int(x) for x in info3['pendentes']] )
+                'vagas' : list( [int(x) if x.isdigit() else 0 for x in info3['vagas']] ),
+                'inscritos' : list( [int(x) if x.isdigit() else 0 for x in info3['inscritos']] ),
+                'pendentes' : list( [int(x) if x.isdigit() else 0 for x in info3['pendentes']] )
             }
         )
 

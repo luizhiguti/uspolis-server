@@ -1,6 +1,8 @@
 from flask import Blueprint, request
 from bson.json_util import dumps
 from marshmallow import EXCLUDE
+from pymongo.errors import PyMongoError
+
 
 from src.common.database import database
 from src.common.crawler import get_jupiter_class_infos
@@ -33,6 +35,7 @@ def create_many_classes():
 
     for subject_code in subject_codes_list:
       subject_classes = get_jupiter_class_infos(subject_code)
+      print(subject_classes)
 
       for class_info in subject_classes:
         schema_load = class_schema.load(class_info)
@@ -44,5 +47,18 @@ def create_many_classes():
 
     return dumps({ "updated" : updated, "inserted" : inserted })
 
-  except:
+  except Exception as ex:
+    print(ex)
     return { "message" : f"Erro ao buscar informações das turmas - {subject_code}", "updated" : updated, "inserted" : inserted }, 400
+
+@class_blueprint.route("/<subject_code>/<class_code>", methods=["DELETE"])
+def delete_by_subject_class_code(subject_code, class_code):
+  query = { "subject_code" : subject_code, "class_code" : class_code }
+  try:
+    result = classes.delete_one(query).deleted_count
+    if not result: raise PyMongoError(f"{subject_code} - {class_code} not found")
+    return dumps(result)
+
+  except PyMongoError as err:
+    return { "message" : err._message }
+
