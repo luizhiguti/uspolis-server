@@ -30,7 +30,7 @@ def create_classroom():
     classroom_schema.load(request.json)
     dict_request_body = request.json
 
-    dict_request_body['updated_at'] = datetime.now().strftime("%d/%m%Y %H:%M")
+    dict_request_body['updated_at'] = datetime.now().strftime("%d/%m/%Y %H:%M")
 
     result = classrooms.insert_one(dict_request_body)
 
@@ -56,7 +56,7 @@ def classroom_by_name(name):
     if request.method == "PUT":
       classroom_schema.load(request.json)
       dict_request_body = request.json
-      dict_request_body['updated_at'] = datetime.now().strftime("%d/%m%Y %H:%M")
+      dict_request_body['updated_at'] = datetime.now().strftime("%d/%m/%Y %H:%M")
 
       update_set = {"$set" : dict_request_body }
       result = classrooms.update_one(query, update_set).modified_count
