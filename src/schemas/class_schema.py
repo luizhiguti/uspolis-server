@@ -8,6 +8,14 @@ class ArraySumField(fields.Field):
     return sum(value)
 
 
+class PreferencesSchema(Schema):
+  building = fields.Str(required=True)
+  min_capacity = fields.Int()
+  air_conditioning = fields.Bool()
+  projector = fields.Bool()
+  accessibility = fields.Bool()
+
+
 class ClassSchema(Schema):
   class_code = fields.Str(data_key="cod_turma")
   subject_code = fields.Str(data_key="cod_disciplina")
@@ -22,3 +30,4 @@ class ClassSchema(Schema):
   vacancies = ArraySumField(data_key="vagas")
   subscribers = ArraySumField(data_key="inscritos")
   pendings = ArraySumField(data_key="pendentes")
+  preferences = fields.Nested(PreferencesSchema)

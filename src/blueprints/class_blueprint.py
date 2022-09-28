@@ -6,7 +6,7 @@ from pymongo.errors import PyMongoError
 
 from src.common.database import database
 from src.common.crawler import get_jupiter_class_infos
-from src.schemas.class_schema import ClassSchema
+from src.schemas.class_schema import ClassSchema, PreferencesSchema
 
 class_blueprint = Blueprint("classes", __name__, url_prefix="/api/classes")
 
@@ -16,6 +16,7 @@ classes = database["classes"]
 # classes.create_index({ "class_code" : 1, "subject_code" : 1 }, unique=True)
 
 class_schema = ClassSchema(unknown=EXCLUDE)
+preferences_schema = PreferencesSchema(unknown=EXCLUDE)
 
 
 @class_blueprint.route("", methods=["GET"])
@@ -62,3 +63,27 @@ def delete_by_subject_class_code(subject_code, class_code):
   except PyMongoError as err:
     return { "message" : err._message }
 
+@class_blueprint.route("/<subject_code>/<class_code>", methods=["PATCH"])
+def update_preferences(subject_code, class_code):
+  query = { "subject_code" : subject_code, "class_code" : class_code }
+  try:
+    schema_load = preferences_schema.load(request.json)
+    result = classes.update_one(query, { "$set" : { "preferences": schema_load } })
+
+    return dumps(result.modified_count)
+
+  except PyMongoError as err:
+    return { "message" : err._message }
+
+@class_blueprint.route("/<subject_code>/<class_code>", methods=["GET"])
+def get_preferences(subject_code, class_code):
+  query = { "subject_code" : subject_code, "class_code" : class_code }
+  try:
+    result = classes.find_one(query, { "_id" : 0 })
+
+    if not result: raise PyMongoError(f"{subject_code}/{class_code} not found")
+
+    return dumps(result)
+
+  except PyMongoError as err:
+    return { "message" : err._message }

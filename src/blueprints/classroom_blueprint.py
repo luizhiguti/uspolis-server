@@ -12,7 +12,7 @@ classroom_blueprint = Blueprint("classrooms", __name__, url_prefix="/api/classro
 classrooms = database["classrooms"]
 
 # classroom_name not unique
-# classrooms.create_index("classroom", unique=True)
+# classrooms.create_index({ "classroom_name" : 1, "building" : 1 }, unique=True)
 
 classroom_schema = ClassroomSchema()
 
