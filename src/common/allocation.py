@@ -1,7 +1,7 @@
 from pulp import *
 import numpy as np
 
-def _can_alocate(s_obj, a_obj): # Wheter or not classroom s has the required resources for class a
+def _can_alocate(s_obj, a_obj): # Wheter or not classroom s has the resources required by class a
 
     a_prefs = a_obj['preferences']
     is_same_building = s_obj['building'] and a_prefs['building']
@@ -26,7 +26,11 @@ def _can_alocate(s_obj, a_obj): # Wheter or not classroom s has the required res
     else:
         satisfies_accessibility = True
 
-    return is_same_building and has_enough_room and satisfies_air_conditioning and satisfies_projector and satisfies_accessibility
+    return is_same_building and \
+        has_enough_room and \
+        satisfies_air_conditioning and \
+        satisfies_projector and \
+        satisfies_accessibility
 
 
 def _has_conflicts(a_obj, a_p_obj):
@@ -40,13 +44,17 @@ def _has_conflicts(a_obj, a_p_obj):
     return same_weekday and hour_conflict
 
 
+def process_solution(sol):
+    pass
+
+
 def allocate_classrooms(classroom_list, class_list):
 
     # Creating set S of classrooms
     S = [s['classroom_name'] for s in classroom_list]
 
     # Creating set A of classes
-    A = [a['class_id'] for a in class_list]
+    A = [a['event_id'] for a in class_list]
 
     # Creating USO (cost of allocation) and eta (possibility of allocation) matrices
     USO = {}
@@ -56,7 +64,7 @@ def allocate_classrooms(classroom_list, class_list):
         USO[s] = {}
         eta[s] = {}
         for a_obj in class_list:
-            a = a_obj['class_id']
+            a = a_obj['event_id']
             USO[s][a] = 1 - a_obj['subscribers']/s_obj['capacity']
             if _can_alocate(s_obj, a_obj):
                 eta[s][a] = 1
@@ -66,10 +74,10 @@ def allocate_classrooms(classroom_list, class_list):
     # Creating theta (time conflict of classes) matrix
     theta = {}
     for a_obj in class_list:
-        a = a_obj['class_id']
+        a = a_obj['event_id']
         theta[a] = {}
         for a_p_obj in class_list:
-            a_p = a_p_obj['class_id']
+            a_p = a_p_obj['event_id']
             if a == a_p:
                 continue
             
@@ -130,13 +138,13 @@ def allocate_classrooms(classroom_list, class_list):
     print("Status:", LpStatus[prob.status])
 
     # Each of the variables is printed with it's resolved optimum value
-    for x in prob.variables():
-        print(x.name, "=", x.varValue)
+    for var in prob.variables():
+        print(var.name, "=", var.varValue)
 
     # The optimised objective function value is printed to the screen
     print("Total Cost of Allocation = ", value(prob.objective))
 
-    return prob
+    return prob, x
 
 
 
