@@ -1,7 +1,8 @@
 from pulp import *
 import numpy as np
+from collections import Counter
 
-def _can_alocate(s_obj, a_obj): # Wheter or not classroom s has the resources required by class a
+def _can_alocate(s_obj, a_obj): # Wheter or not classroom s has the resources required by event a
 
     a_prefs = a_obj['preferences']
     is_same_building = s_obj['building'] and a_prefs['building']
@@ -36,7 +37,7 @@ def _can_alocate(s_obj, a_obj): # Wheter or not classroom s has the resources re
 def _has_conflicts(a_obj, a_p_obj):
     same_weekday = (a_obj['week_days'] == a_p_obj['week_days'])
     if (a_obj['start_time'] <= a_p_obj['end_time']) and \
-        (a_obj['end_time'] <= a_p_obj['start_time']) :
+        (a_obj['end_time'] >= a_p_obj['start_time']) :
         hour_conflict = True
     else:
         hour_conflict = False
@@ -48,13 +49,16 @@ def process_solution(sol):
     pass
 
 
-def allocate_classrooms(classroom_list, class_list):
+def allocate_classrooms(classroom_list, event_list):
 
     # Creating set S of classrooms
     S = [s['classroom_name'] for s in classroom_list]
 
-    # Creating set A of classes
-    A = [a['event_id'] for a in class_list]
+    # Creating set A of events
+    A = [a['event_id'] for a in event_list]
+
+    # Creating set T of classes
+    T = list(Counter([a['class_id'] for a in event_list]).keys()) # gets unique values of class_code
 
     # Creating USO (cost of allocation) and eta (possibility of allocation) matrices
     USO = {}
@@ -63,7 +67,7 @@ def allocate_classrooms(classroom_list, class_list):
         s = s_obj['classroom_name']
         USO[s] = {}
         eta[s] = {}
-        for a_obj in class_list:
+        for a_obj in event_list:
             a = a_obj['event_id']
             USO[s][a] = 1 - a_obj['subscribers']/s_obj['capacity']
             if _can_alocate(s_obj, a_obj):
@@ -71,12 +75,12 @@ def allocate_classrooms(classroom_list, class_list):
             else:
                 eta[s][a] = 0
 
-    # Creating theta (time conflict of classes) matrix
+    # Creating theta (time conflict of events) matrix
     theta = {}
-    for a_obj in class_list:
+    for a_obj in event_list:
         a = a_obj['event_id']
         theta[a] = {}
-        for a_p_obj in class_list:
+        for a_p_obj in event_list:
             a_p = a_p_obj['event_id']
             if a == a_p:
                 continue
@@ -85,10 +89,20 @@ def allocate_classrooms(classroom_list, class_list):
                 theta[a][a_p] = 1
             else:
                 theta[a][a_p] = 0
+    
+    # Creating set A_t (subset of events a (in A) for a given class T)
+    A_t = {}
+    for t in T: 
+        A_t[t] = []
+    for a_obj in event_list:
+        a = a_obj['event_id']
+        t = a_obj['class_id']
+        A_t[t].append(a)
 
     a_s_tuples = [(s,a) for s in S for a in A]
 
     x = LpVariable.dicts("alloc_", (S,A), 0, 1, cat='Integer')
+    y = LpVariable.dicts("classroom_changes_", (T), 0, None, cat='Integer')
 
     ############################ Problem formulation ############################
 
@@ -96,15 +110,16 @@ def allocate_classrooms(classroom_list, class_list):
 
     # Objective function
     prob += (
-        lpSum([USO[s][a] * x[s][a] for (s,a) in a_s_tuples]),
-        "Sum_of_allocation_cost"
+        # lpSum([USO[s][a] * x[s][a] for (s,a) in a_s_tuples] + [y[t] for t in T]),
+        lpSum([y[t] for t in T]),
+        "Total_classroom_changes"
     )
 
-    # One classroom per class constraint
+    # One classroom per event constraint
     for a in A:
         prob += (
             lpSum([x[s][a] for s in S]) == 1,
-            f"Number_of_allocated_classrooms_for_class_{a}"
+            f"Number_of_allocated_classrooms_for_event_{a}"
         )
 
     # Resources/Preferences constraint
@@ -112,7 +127,7 @@ def allocate_classrooms(classroom_list, class_list):
         for a in A:
             prob += (
                 x[s][a] <= eta[s][a],
-                f'Classroom_{s}_can_contain_class{a}'
+                f'Classroom_{s}_can_contain_event{a}'
             )
     
     # Time conflict constraint
@@ -125,6 +140,13 @@ def allocate_classrooms(classroom_list, class_list):
                     prob += (
                         x[s][a] + x[s][a_p] <= 1
                     )
+
+    # Bound the changement of classrooms per class
+    for t in T:
+        prob += (
+            lpSum([x[s][a] for s in S for a in A_t[t]]) <= 1 + y[t] 
+        )
+                
 
     ############################## Problem solution ##############################
 
@@ -142,9 +164,9 @@ def allocate_classrooms(classroom_list, class_list):
         print(var.name, "=", var.varValue)
 
     # The optimised objective function value is printed to the screen
-    print("Total Cost of Allocation = ", value(prob.objective))
+    print("Total classroom changes = ", value(prob.objective))
 
-    return prob, x
+    return x, y
 
 
 
