@@ -1,6 +1,7 @@
 from pulp import *
 import numpy as np
 from collections import Counter
+from itertools import combinations, permutations
 
 def _can_alocate(s_obj, a_obj): # Wheter or not classroom s has the resources required by event a
 
@@ -91,13 +92,13 @@ def allocate_classrooms(classroom_list, event_list):
                 theta[a][a_p] = 0
     
     # Creating set A_t (subset of events a (in A) for a given class T)
-    A_t = {}
+    A_ = {}
     for t in T: 
-        A_t[t] = []
+        A_[t] = []
     for a_obj in event_list:
         a = a_obj['event_id']
         t = a_obj['class_id']
-        A_t[t].append(a)
+        A_[t].append(a)
 
     a_s_tuples = [(s,a) for s in S for a in A]
 
@@ -143,9 +144,13 @@ def allocate_classrooms(classroom_list, event_list):
 
     # Bound the changement of classrooms per class
     for t in T:
-        prob += (
-            lpSum([x[s][a] for s in S for a in A_t[t]]) <= 1 + y[t] 
-        )
+        for s_combination in combinations(S, len(A_[t])):
+            for s_tuple in permutations(s_combination):
+                # print('oi')
+                prob += (
+                    lpSum([x[s_tuple[i]][A_[t][i]] for i in range(len(A_[t]))]) <= 1 + y[t],
+                    f'Classroom change condition for class {t} with pattern {s_tuple}' 
+                )
                 
 
     ############################## Problem solution ##############################
