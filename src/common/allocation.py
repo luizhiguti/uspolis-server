@@ -46,8 +46,23 @@ def _has_conflicts(a_obj, a_p_obj):
     return same_weekday and hour_conflict
 
 
-def process_solution(sol):
-    pass
+def _process_solution(x, y, classroom_list, event_list):
+    allocation_list = []
+    for c in classroom_list:
+        for e in event_list:
+            if x[c['classroom_name']][e['event_id']].value() == 1:
+                entry = {
+                    'subject_code' : e['subject_name'],
+                    'class_code' : e['class_code'],
+                    'week_day' : e['week_days'],
+                    'start_time' : e['start_time'].strftime('%H:%M'),
+                    'end_time' : e['end_time'].strftime('%H:%M'),
+                    'classroom' : c['classroom_name'],
+                    'building' : c['building'],
+                }
+                allocation_list.append(entry)
+
+    return allocation_list
 
 
 def allocate_classrooms(classroom_list, event_list):
@@ -139,17 +154,17 @@ def allocate_classrooms(classroom_list, event_list):
                     continue
                 if theta[a][a_p] == 1:
                     prob += (
-                        x[s][a] + x[s][a_p] <= 1
+                        x[s][a] + x[s][a_p] <= 1,
+                        f'Events_{a}_and_{a_p}_cant_both_be_in_classroom_{s}'
                     )
 
     # Bound the changement of classrooms per class
     for t in T:
         for s_combination in combinations(S, len(A_[t])):
             for s_tuple in permutations(s_combination):
-                # print('oi')
                 prob += (
                     lpSum([x[s_tuple[i]][A_[t][i]] for i in range(len(A_[t]))]) <= 1 + y[t],
-                    f'Classroom change condition for class {t} with pattern {s_tuple}' 
+                    f'Classroom change bounding for class {t} with pattern {s_tuple}' 
                 )
                 
 
@@ -162,16 +177,18 @@ def allocate_classrooms(classroom_list, event_list):
     prob.solve()
 
     # The status of the solution is printed to the screen
-    print("Status:", LpStatus[prob.status])
+    print("Solution status:", LpStatus[prob.status])
 
     # Each of the variables is printed with it's resolved optimum value
-    for var in prob.variables():
-        print(var.name, "=", var.varValue)
+    # for var in prob.variables():
+    #     print(var.name, "=", var.varValue)
 
     # The optimised objective function value is printed to the screen
     print("Total classroom changes = ", value(prob.objective))
 
-    return x, y
+    allocation_list = _process_solution(x, y, classroom_list, event_list)
+
+    return allocation_list
 
 
 
