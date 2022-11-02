@@ -4,4 +4,7 @@ marshmallow
 pymongo
 bs4
 requests
-re
+regex
+pulp
+matplotlib
+pandas

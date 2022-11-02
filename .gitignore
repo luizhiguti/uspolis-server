@@ -8,3 +8,6 @@ env/
 venv/
 env
 env_uspolis
+
+# solver generated data
+*.lp

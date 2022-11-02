@@ -10,9 +10,9 @@ def _can_alocate(s_obj, a_obj): # Wheter or not classroom s has the resources re
 
     if a_obj['subscribers'] <= s_obj['capacity']:
         has_enough_room = True
-    else: 
+    else:
         has_enough_room = False
-    
+
     if a_prefs['air_conditioning'] == True:
         satisfies_air_conditioning = s_obj['air_conditioning'] 
     else:
@@ -100,15 +100,15 @@ def allocate_classrooms(classroom_list, event_list):
             a_p = a_p_obj['event_id']
             if a == a_p:
                 continue
-            
+
             if _has_conflicts(a_obj, a_p_obj):
                 theta[a][a_p] = 1
             else:
                 theta[a][a_p] = 0
-    
+
     # Creating set A_t (subset of events a (in A) for a given class T)
     A_ = {}
-    for t in T: 
+    for t in T:
         A_[t] = []
     for a_obj in event_list:
         a = a_obj['event_id']
@@ -145,7 +145,7 @@ def allocate_classrooms(classroom_list, event_list):
                 x[s][a] <= eta[s][a],
                 f'Classroom_{s}_can_contain_event{a}'
             )
-    
+
     # Time conflict constraint
     for s in S:
         for a in A:
@@ -166,12 +166,12 @@ def allocate_classrooms(classroom_list, event_list):
                     lpSum([x[s_tuple[i]][A_[t][i]] for i in range(len(A_[t]))]) <= 1 + y[t],
                     f'Classroom change bounding for class {t} with pattern {s_tuple}' 
                 )
-                
+
 
     ############################## Problem solution ##############################
 
     # The problem data is written to an .lp file
-    prob.writeLP("ClassroomAllocationProblem.lp")
+    prob.writeLP("src/common/allocation/ClassroomAllocationProblem.lp")
 
     # The problem is solved using PuLP's choice of Solver
     prob.solve()
@@ -189,9 +189,3 @@ def allocate_classrooms(classroom_list, event_list):
     allocation_list = _process_solution(x, y, classroom_list, event_list)
 
     return allocation_list
-
-
-
-
-
-
