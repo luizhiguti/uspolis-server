@@ -18,7 +18,7 @@ classroom_schema = ClassroomSchema()
 
 @classroom_blueprint.route("")
 def get_all_classrooms():
-  result = classrooms.find({}, { "_id" : 0 })
+  result = classrooms.find({"building" : "Biênio"}, { "_id" : 0 })
   resultList = list(result)
 
   return dumps(resultList)

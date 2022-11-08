@@ -4,13 +4,13 @@ class ArraySumField(fields.Field):
   """
   fields to sum array values
   """
-  def _deserialize(self, value, attr, data, **kwargs):
+  def _deserialize(self, value, _, __, **___):
     return sum(value)
 
 
 class PreferencesSchema(Schema):
   building = fields.Str(required=True)
-  min_capacity = fields.Int()
+  min_capacity = fields.Bool()
   air_conditioning = fields.Bool()
   projector = fields.Bool()
   accessibility = fields.Bool()

@@ -5,7 +5,7 @@ _id,accessibility,air_conditioning,building,capacity,classroom_name,floor,projec
 63629088e2d45a83eecada37,true,true,Mecânica,90,A07,0,false,23/02/2018 21:18
 63629088e2d45a83eecada3b,true,true,Civil,100,S-05,0,false,23/02/2018 21:36
 63629088e2d45a83eecada3c,true,true,Mecânica,100,A09,0,false,23/02/2018 21:41
-63629088e2d45a83eecada3d,,true,120,1,WEB0,0,true,
+63629088e2d45a83eecada3d,true,true,,120,WEB0,0,true,07/11/2022 18:34
 63629088e2d45a83eecada3f,true,true,Produção,100,D1 009,0,false,24/02/2018 00:02
 63629088e2d45a83eecada40,true,true,Produção,100,D2 013,0,false,24/02/2018 00:03
 63629088e2d45a83eecada42,true,true,Civil,60,S-17,1,false,06/03/2018 21:55

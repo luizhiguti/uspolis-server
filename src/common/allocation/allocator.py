@@ -14,7 +14,7 @@ def _can_alocate(s_obj, a_obj): # Wheter or not classroom s has the resources re
         has_enough_room = False
 
     if a_prefs['air_conditioning'] == True:
-        satisfies_air_conditioning = s_obj['air_conditioning'] 
+        satisfies_air_conditioning = s_obj['air_conditioning']
     else:
         satisfies_air_conditioning = True
 
@@ -36,7 +36,7 @@ def _can_alocate(s_obj, a_obj): # Wheter or not classroom s has the resources re
 
 
 def _has_conflicts(a_obj, a_p_obj):
-    same_weekday = (a_obj['week_days'] == a_p_obj['week_days'])
+    same_weekday = (a_obj['week_day'] == a_p_obj['week_day'])
     if (a_obj['start_time'] <= a_p_obj['end_time']) and \
         (a_obj['end_time'] >= a_p_obj['start_time']) :
         hour_conflict = True
@@ -52,13 +52,16 @@ def _process_solution(x, y, classroom_list, event_list):
         for e in event_list:
             if x[c['classroom_name']][e['event_id']].value() == 1:
                 entry = {
-                    'subject_code' : e['subject_name'],
+                    'subject_code' : e['subject_code'],
                     'class_code' : e['class_code'],
-                    'week_day' : e['week_days'],
+                    'week_day' : e['week_day'],
                     'start_time' : e['start_time'].strftime('%H:%M'),
                     'end_time' : e['end_time'].strftime('%H:%M'),
                     'classroom' : c['classroom_name'],
                     'building' : c['building'],
+                    # 'start_period' : e['start_period'].strftime('%d/%m/%Y'),
+                    # 'end_period' : e['end_period'].strftime('%d/%m/%Y'),
+                    # 'professor' : e['professor']
                 }
                 allocation_list.append(entry)
 
