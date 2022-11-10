@@ -24,8 +24,8 @@ def break_class_into_events(class_obj):
             event['class_code'] = class_obj['class_code']
             event['subject_code'] = class_obj['subject_code']
             event['subject_name'] = class_obj['subject_name']
-            event['start_period'] = class_obj['start_period']
-            event['end_period'] = class_obj['end_period']
+            event['start_period'] = datetime.strptime(class_obj['start_period'], '%d/%m/%Y').strftime('%Y/%m/%d')
+            event['end_period'] = datetime.strptime(class_obj['end_period'], '%d/%m/%Y').strftime('%Y/%m/%d')
             event['class_type'] = class_obj['class_type']
             event['vacancies'] = class_obj['vacancies']
             event['pendings'] = class_obj['pendings']
@@ -34,7 +34,7 @@ def break_class_into_events(class_obj):
             # set default preferences
             event['preferences'] = {
                 'building' : 'Biênio',
-                'min_capacity' : False,
+                'required' : True,
                 'air_conditioning' : False,
                 'projector' : False,
                 'accessibility' : False,

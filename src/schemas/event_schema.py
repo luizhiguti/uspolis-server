@@ -1,4 +1,4 @@
-from marshmallow import Schema, fields
+from marshmallow import Schema, fields, EXCLUDE
 
 from src.schemas.class_schema import PreferencesSchema
 
@@ -16,6 +16,6 @@ class EventSchema(Schema):
   vacancies = fields.Int()
   subscribers = fields.Int()
   pendings = fields.Int()
-  preferences = fields.Nested(PreferencesSchema)
+  preferences = fields.Nested(PreferencesSchema(unknown=EXCLUDE))
   classroom = fields.Str()
   building = fields.Str()

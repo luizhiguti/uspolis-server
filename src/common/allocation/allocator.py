@@ -59,9 +59,6 @@ def _process_solution(x, y, classroom_list, event_list):
                     'end_time' : e['end_time'].strftime('%H:%M'),
                     'classroom' : c['classroom_name'],
                     'building' : c['building'],
-                    # 'start_period' : e['start_period'].strftime('%d/%m/%Y'),
-                    # 'end_period' : e['end_period'].strftime('%d/%m/%Y'),
-                    # 'professor' : e['professor']
                 }
                 allocation_list.append(entry)
 

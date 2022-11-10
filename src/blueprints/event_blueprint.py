@@ -17,7 +17,7 @@ classrooms = database["classrooms"]
 # event id - start_time, end_time, week_day
 # classroom id - building, classroom
 
-event_schema = EventSchema(unknown=INCLUDE)
+event_schema = EventSchema(unknown=EXCLUDE)
 allocation_output_schema = AllocatorOutputSchema()
 allocation_input_schema = AllocatorInputSchema(many=True, unknown=EXCLUDE)
 
@@ -117,7 +117,13 @@ def parse():
       }
       result = events.update_one(
         query,
-        { "$set" : load },
+        { "$set" : {"preferences" : {
+                'building' : 'Biênio',
+                'required' : True,
+                'air_conditioning' : False,
+                'projector' : False,
+                'accessibility' : False,
+            }} },
         upsert=True)
 
       parsed += result.matched_count
