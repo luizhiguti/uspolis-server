@@ -3,7 +3,6 @@ from bson.json_util import dumps
 from marshmallow import EXCLUDE,INCLUDE, ValidationError
 
 from src.common.database import database
-from src.schemas.event_schema import EventSchema
 from src.schemas.allocation_schema import AllocatorInputSchema, AllocatorOutputSchema
 from src.common.allocation.allocator import allocate_classrooms
 from src.common.mappers.classes_mapper import break_class_into_events
@@ -17,7 +16,6 @@ classrooms = database["classrooms"]
 # event id - start_time, end_time, week_day
 # classroom id - building, classroom
 
-event_schema = EventSchema(unknown=EXCLUDE)
 allocation_output_schema = AllocatorOutputSchema()
 allocation_input_schema = AllocatorInputSchema(many=True, unknown=EXCLUDE)
 
@@ -37,7 +35,6 @@ def save_allocation():
 
     # parse date & time fields
     allocation_input_schema_load = allocation_input_schema.load(events_list)
-    print(allocation_input_schema_load[0])
 
     print(f'Number of events: {len(events_list)}')
 
@@ -69,67 +66,25 @@ def save_allocation():
   except Exception as ex:
     return { "message" : "Erro ao calcular alocação", "error": str(ex) }, 500
 
-@event_blueprint.route("classes", methods=["PATCH"])
-# test classes to events mapper while subject not available in jupiterweb
-def test_class_mapper():
+
+@event_blueprint.route("edit/<subject_code>/<class_code>", methods=["PATCH"])
+def edit_allocation(subject_code, class_code):
   try:
-    efc = database['events_from_classes']
-    classes = database['classes']
+    week_days = request.json
+    classroom = request.args["classroom"]
 
-    classes_list = classes.find()
-
-    for c in classes_list:
-      # print(c)
-      events = break_class_into_events(c)
-      for e in events:
-        # print(e)
-        load = event_schema.load(e)
-        query = {
-        "class_code" : load["class_code"],
-        "subject_code" : load["subject_code"],
-        "week_day" : load["week_day"]
-        }
-        result = efc.update_one(
-          query,
-          { "$set" : load },
-          upsert=True)
-
-    return ""
-
-  except Exception as ex:
-    print(ex)
-    return "", 500
-
-
-@event_blueprint.route("parse", methods=["PATCH"])
-# parse old allocation to new events data schema
-def parse():
-  try:
-    events_list = events.find()
-    parsed = 0
-
-    for e in events_list:
-      load = event_schema.load(e)
-      query = {
-        "class_code" : load["class_code"],
-        "subject_code" : load["subject_code"],
-        "week_day" : load["week_day"]
+    query = {
+        "subject_code" : subject_code,
+        "class_code" : class_code,
+        "week_day": { "$in" : week_days }
       }
-      result = events.update_one(
-        query,
-        { "$set" : {"preferences" : {
-                'building' : 'Biênio',
-                'required' : True,
-                'air_conditioning' : False,
-                'projector' : False,
-                'accessibility' : False,
-            }} },
-        upsert=True)
 
-      parsed += result.matched_count
+    result = events.update_many(query,
+      { "$set" : { "classroom" : classroom } }
+    )
 
-    return dumps(parsed)
+    return dumps(result.matched_count)
 
   except Exception as ex:
     print(ex)
-    return ""
+    return { "message" : ex }, 500

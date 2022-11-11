@@ -5,16 +5,18 @@ from pymongo.errors import DuplicateKeyError, PyMongoError
 from datetime import datetime
 
 from src.common.database import database
-from src.schemas.classroom_schema import ClassroomSchema
+from src.schemas.classroom_schema import ClassroomSchema, AvailableClassroomsQuerySchema
 
 classroom_blueprint = Blueprint("classrooms", __name__, url_prefix="/api/classrooms")
 
 classrooms = database["classrooms"]
+events = database["events"]
 
 # classroom_name not unique
 # classrooms.create_index({ "classroom_name" : 1, "building" : 1 }, unique=True)
 
 classroom_schema = ClassroomSchema()
+available_classrooms_query_schema = AvailableClassroomsQuerySchema()
 
 @classroom_blueprint.route("")
 def get_all_classrooms():
@@ -70,3 +72,27 @@ def classroom_by_name(name):
 
   except PyMongoError as err:
     return { "message" : err._message }
+
+@classroom_blueprint.route("/available")
+def get_available_classrooms():
+  try:
+    params = available_classrooms_query_schema.load(request.args)
+    unavailable_classrooms = events.find(
+      {
+        "week_day" : params["week_day"],
+        "start_time": { "$lte" : params["end_time"] },
+        "end_time" : { "$gte" : params["start_time"] }
+      },
+      { "classroom" : True , "_id" : False }
+      ).distinct("classroom")
+
+    classrooms_list = classrooms.find(
+      { "building" : "Biênio" }, { "classroom_name" : True, "_id" : False }
+      ).distinct("classroom_name")
+
+    available_classrooms = [c for c in classrooms_list if c not in unavailable_classrooms]
+
+    return dumps(available_classrooms)
+
+  except ValidationError as err:
+    return { "message" : err.messages }, 400
