@@ -90,6 +90,9 @@ def allocate_classrooms(classroom_list, event_list):
 
     # Creating set T of classes
     T = list(Counter([a['class_id'] for a in event_list]).keys()) # gets unique values of class_code
+    
+    # Creating set A_optional of events that don't have to necessarily be allocated
+    A_optional = [a['event_id'] for a in event_list if a['has_to_be_allocated'] == False]
 
     # Creating USO (cost of allocation) and eta (possibility of allocation) matrices
     USO = {}
@@ -131,6 +134,7 @@ def allocate_classrooms(classroom_list, event_list):
         A_[t].append(a)
 
     a_s_tuples = [(s,a) for s in S for a in A]
+    ao_s_tuples = [(s,ao) for s in S for ao in A_optional]
 
     x = LpVariable.dicts("alloc_", (S,A), 0, 1, cat='Integer')
     y = LpVariable.dicts("classroom_changes_", (T), 0, None, cat='Integer')
@@ -144,6 +148,9 @@ def allocate_classrooms(classroom_list, event_list):
         # lpSum([USO[s][a] * x[s][a] for (s,a) in a_s_tuples] + [y[t] for t in T]),
         lpSum([y[t] for t in T]),
         "Total_classroom_changes"
+    ) + (
+        100*lpSum([1 - x[s][ao] for (s, ao) in ao_s_tuples ]),
+        "Events_not_allocated"
     )
 
     # One classroom per event constraint
@@ -173,7 +180,7 @@ def allocate_classrooms(classroom_list, event_list):
                         f'Events_{a}_and_{a_p}_cant_both_be_in_classroom_{s}'
                     )
 
-    # Bound the changement of classrooms per class
+    # Bound the changement of classrooms per class constraint
     for t in T:
         for s_combination in combinations(S, len(A_[t])):
             for s_tuple in permutations(s_combination):
