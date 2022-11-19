@@ -3,7 +3,8 @@ import numpy as np
 from collections import Counter
 from itertools import combinations, permutations
 
-def _can_alocate(s_obj, a_obj): # Wheter or not classroom s has the resources required by event a
+def _can_alocate(s_obj, a_obj): 
+    """Returns wheter or not classroom s has the resources required by event a"""
 
     a_prefs = a_obj['preferences']
     is_same_building = s_obj['building'] and a_prefs['building']
@@ -36,6 +37,8 @@ def _can_alocate(s_obj, a_obj): # Wheter or not classroom s has the resources re
 
 
 def _has_conflicts(a_obj, a_p_obj):
+    """Returns wheter or not events a and a_p have conflitcts (i.e can't be allocated in the same classroom)"""
+
     same_weekday = (a_obj['week_days'] == a_p_obj['week_days'])
     if (a_obj['start_time'] <= a_p_obj['end_time']) and \
         (a_obj['end_time'] >= a_p_obj['start_time']) :
@@ -47,6 +50,8 @@ def _has_conflicts(a_obj, a_p_obj):
 
 
 def _process_solution(x, y, classroom_list, event_list):
+    """Takes the optimization problem variables and processes them to a database-ready format"""
+
     allocation_list = []
     for c in classroom_list:
         for e in event_list:
@@ -66,7 +71,17 @@ def _process_solution(x, y, classroom_list, event_list):
 
 
 def allocate_classrooms(classroom_list, event_list):
+    """ 
+    Runs the allocation algorithm
+    
+    Parameters:
+    classroom_list (list[dict]): list of dictionaries representing each classroom available for allocation
+    event_list (list[dict]): list of dictionaries representing each event to be allocated
+  
+    Returns:
+    list[dict] : list of allocations (event-classroom pairs) found 
 
+    """
     # Creating set S of classrooms
     S = [s['classroom_name'] for s in classroom_list]
 
