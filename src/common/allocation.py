@@ -153,12 +153,21 @@ def allocate_classrooms(classroom_list, event_list):
         "Events_not_allocated"
     )
 
-    # One classroom per event constraint
+    # One and only one classroom per mandatory event constraint
     for a in A:
-        prob += (
-            lpSum([x[s][a] for s in S]) == 1,
-            f"Number_of_allocated_classrooms_for_event_{a}"
-        )
+        if a not in A_optional:
+            prob += (
+                lpSum([x[s][a] for s in S]) == 1,
+                f"Number_of_allocated_classrooms_for_mandatory_event_{a}"
+            )
+
+    # One or zero classrooms per optional event constraint
+    for a in A:
+        if a in A_optional:
+            prob += (
+                lpSum([x[s][a] for s in S]) <= 1,
+                f"Number_of_allocated_classrooms_for_optional_event_{a}"
+            )
 
     # Resources/Preferences constraint
     for s in S:
