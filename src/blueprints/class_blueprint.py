@@ -83,7 +83,7 @@ def delete_by_subject_class_code(subject_code, class_code):
   except PyMongoError as err:
     return { "message" : err._message }
 
-@class_blueprint.route("/<subject_code>/<class_code>", methods=["PATCH"])
+@class_blueprint.route("/preferences/<subject_code>/<class_code>", methods=["PATCH"])
 def update_preferences(subject_code, class_code):
   query = { "subject_code" : subject_code, "class_code" : class_code }
   try:
@@ -107,3 +107,33 @@ def get_preferences(subject_code, class_code):
 
   except PyMongoError as err:
     return { "message" : err._message }
+
+@class_blueprint.route("/<subject_code>/<class_code>", methods=["PATCH"])
+def edit_class(subject_code, class_code):
+  try:
+    class_events = request.json
+    updated = 0
+
+    for event in class_events:
+      query = {
+        "subject_code" : subject_code,
+        "class_code" : class_code,
+        "week_day" : event["week_day_id"]
+      }
+
+      result = events.update_one(query,
+        { "$set" :
+          { "week_day" : event["week_day"],
+            "start_time" : event["start_time"],
+            "end_time": event["end_time"],
+            "professor" : event["professor"] }
+        }
+      )
+      updated += result.matched_count
+
+    return dumps({ "updated" : updated })
+
+  except Exception as ex:
+    print(ex)
+    return { "message" : ex }, 500
+
