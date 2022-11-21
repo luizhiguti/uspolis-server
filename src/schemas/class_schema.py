@@ -10,7 +10,6 @@ class ArraySumField(fields.Field):
 
 class PreferencesSchema(Schema):
   building = fields.Str(required=True)
-  required = fields.Bool()
   air_conditioning = fields.Bool()
   projector = fields.Bool()
   accessibility = fields.Bool()
@@ -31,3 +30,5 @@ class ClassSchema(Schema):
   subscribers = ArraySumField(data_key="inscritos")
   pendings = ArraySumField(data_key="pendentes")
   preferences = fields.Nested(PreferencesSchema)
+  has_to_be_allocated = fields.Bool()
+

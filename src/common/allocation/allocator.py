@@ -145,10 +145,10 @@ def allocate_classrooms(classroom_list, event_list):
 
     # Objective function
     prob += (
-        # lpSum([USO[s][a] * x[s][a] for (s,a) in a_s_tuples] + [y[t] for t in T]),
         lpSum([y[t] for t in T]),
         "Total_classroom_changes"
-    ) + (
+    )
+    prob += (
         100*lpSum([1 - x[s][ao] for (s, ao) in ao_s_tuples ]),
         "Events_not_allocated"
     )
@@ -195,7 +195,7 @@ def allocate_classrooms(classroom_list, event_list):
             for s_tuple in permutations(s_combination):
                 prob += (
                     lpSum([x[s_tuple[i]][A_[t][i]] for i in range(len(A_[t]))]) <= 1 + y[t],
-                    f'Classroom change bounding for class {t} with pattern {s_tuple}'
+                    f'Classroom_change_bounding_for_class_{t}_with_pattern_{s_tuple}'
                 )
 
 

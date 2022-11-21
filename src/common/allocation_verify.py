@@ -3,17 +3,17 @@ import numpy as np
 
 
 def verify_allocation(allocation, classroom_list, event_list):
-    """ 
+    """
     Returns whether an allocation (set of event-classroom pairs) is valid or not, for the given a set of validity conditions
-    
+
     Parameters:
     allocation (list[dict]): list of event-classroom pairs, representing the allocation
     classroom_list (list[dict]): list of dictionaries representing each classroom available for allocation
     event_list (list[dict]): list of dictionaries representing each event to be allocated
-  
+
     Returns:
     bool: whether the allocation is valid or not
-    dict: dict of problems found in allocation 
+    dict: dict of problems found in allocation
     """
 
     exceptions = {}
@@ -33,7 +33,7 @@ def verify_allocation(allocation, classroom_list, event_list):
 
 #     df_allocation.groupby('')
 
-#     return 
+#     return
 
 # def _has_conflicts(a_obj, a_p_obj):
 #     """Returns wheter or not events a and a_p have conflitcts (i.e can't be allocated in the same classroom)"""

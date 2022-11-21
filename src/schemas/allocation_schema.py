@@ -10,6 +10,7 @@ class AllocatorInputSchema(Schema):
   end_time = fields.Time("%H:%M")
   subscribers = fields.Int()
   preferences = fields.Nested(PreferencesSchema)
+  has_to_be_allocated = fields.Bool()
 
   @post_load
   def create_ids(self, data, **_):

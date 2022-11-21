@@ -34,11 +34,12 @@ def break_class_into_events(class_obj):
             # set default preferences
             event['preferences'] = {
                 'building' : 'Biênio',
-                'required' : True,
                 'air_conditioning' : False,
                 'projector' : False,
                 'accessibility' : False,
             }
+
+            event['has_to_be_allocated'] = True
 
             event_list.append(event)
 
