@@ -3,7 +3,8 @@ import numpy as np
 from collections import Counter
 from itertools import combinations, permutations
 
-def _can_alocate(s_obj, a_obj): # Wheter or not classroom s has the resources required by event a
+def _can_alocate(s_obj, a_obj):
+    """Returns wheter or not classroom s has the resources required by event a"""
 
     a_prefs = a_obj['preferences']
     is_same_building = s_obj['building'] and a_prefs['building']
@@ -36,6 +37,8 @@ def _can_alocate(s_obj, a_obj): # Wheter or not classroom s has the resources re
 
 
 def _has_conflicts(a_obj, a_p_obj):
+    """Returns wheter or not events a and a_p have conflitcts (i.e can't be allocated in the same classroom)"""
+
     same_weekday = (a_obj['week_day'] == a_p_obj['week_day'])
     if (a_obj['start_time'] <= a_p_obj['end_time']) and \
         (a_obj['end_time'] >= a_p_obj['start_time']) :
@@ -47,6 +50,8 @@ def _has_conflicts(a_obj, a_p_obj):
 
 
 def _process_solution(x, y, classroom_list, event_list):
+    """Takes the optimization problem variables and processes them to a database-ready format"""
+
     allocation_list = []
     for c in classroom_list:
         for e in event_list:
@@ -66,7 +71,17 @@ def _process_solution(x, y, classroom_list, event_list):
 
 
 def allocate_classrooms(classroom_list, event_list):
+    """
+    Runs the allocation algorithm
 
+    Parameters:
+    classroom_list (list[dict]): list of dictionaries representing each classroom available for allocation
+    event_list (list[dict]): list of dictionaries representing each event to be allocated
+
+    Returns:
+    list[dict] : list of allocations (event-classroom pairs) found
+
+    """
     # Creating set S of classrooms
     S = [s['classroom_name'] for s in classroom_list]
 
@@ -75,6 +90,9 @@ def allocate_classrooms(classroom_list, event_list):
 
     # Creating set T of classes
     T = list(Counter([a['class_id'] for a in event_list]).keys()) # gets unique values of class_code
+
+    # Creating set A_optional of events that don't have to necessarily be allocated
+    A_optional = [a['event_id'] for a in event_list if a['has_to_be_allocated'] == False]
 
     # Creating USO (cost of allocation) and eta (possibility of allocation) matrices
     USO = {}
@@ -116,6 +134,7 @@ def allocate_classrooms(classroom_list, event_list):
         A_[t].append(a)
 
     a_s_tuples = [(s,a) for s in S for a in A]
+    ao_s_tuples = [(s,ao) for s in S for ao in A_optional]
 
     x = LpVariable.dicts("alloc_", (S,A), 0, 1, cat='Integer')
     y = LpVariable.dicts("classroom_changes_", (T), 0, None, cat='Integer')
@@ -129,14 +148,26 @@ def allocate_classrooms(classroom_list, event_list):
         # lpSum([USO[s][a] * x[s][a] for (s,a) in a_s_tuples] + [y[t] for t in T]),
         lpSum([y[t] for t in T]),
         "Total_classroom_changes"
+    ) + (
+        100*lpSum([1 - x[s][ao] for (s, ao) in ao_s_tuples ]),
+        "Events_not_allocated"
     )
 
-    # One classroom per event constraint
+    # One and only one classroom per mandatory event constraint
     for a in A:
-        prob += (
-            lpSum([x[s][a] for s in S]) == 1,
-            f"Number_of_allocated_classrooms_for_event_{a}"
-        )
+        if a not in A_optional:
+            prob += (
+                lpSum([x[s][a] for s in S]) == 1,
+                f"Number_of_allocated_classrooms_for_mandatory_event_{a}"
+            )
+
+    # One or zero classrooms per optional event constraint
+    for a in A:
+        if a in A_optional:
+            prob += (
+                lpSum([x[s][a] for s in S]) <= 1,
+                f"Number_of_allocated_classrooms_for_optional_event_{a}"
+            )
 
     # Resources/Preferences constraint
     for s in S:
@@ -158,13 +189,13 @@ def allocate_classrooms(classroom_list, event_list):
                         f'Events_{a}_and_{a_p}_cant_both_be_in_classroom_{s}'
                     )
 
-    # Bound the changement of classrooms per class
+    # Bound the changement of classrooms per class constraint
     for t in T:
         for s_combination in combinations(S, len(A_[t])):
             for s_tuple in permutations(s_combination):
                 prob += (
                     lpSum([x[s_tuple[i]][A_[t][i]] for i in range(len(A_[t]))]) <= 1 + y[t],
-                    f'Classroom change bounding for class {t} with pattern {s_tuple}' 
+                    f'Classroom change bounding for class {t} with pattern {s_tuple}'
                 )
 
 
