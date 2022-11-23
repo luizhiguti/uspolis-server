@@ -133,7 +133,7 @@ def allocate_classrooms(classroom_list, event_list):
         t = a_obj['class_id']
         A_[t].append(a)
 
-    a_s_tuples = [(s,a) for s in S for a in A]
+    # a_s_tuples = [(s,a) for s in S for a in A]
     ao_s_tuples = [(s,ao) for s in S for ao in A_optional]
 
     x = LpVariable.dicts("alloc_", (S,A), 0, 1, cat='Integer')
@@ -141,7 +141,7 @@ def allocate_classrooms(classroom_list, event_list):
 
     ############################ Problem formulation ############################
 
-    prob = LpProblem("Classroom allocation problem", LpMinimize)
+    prob = LpProblem("Classroom_allocation_problem", LpMinimize)
 
     # Objective function
     prob += (
@@ -168,6 +168,13 @@ def allocate_classrooms(classroom_list, event_list):
                 lpSum([x[s][a] for s in S]) <= 1,
                 f"Number_of_allocated_classrooms_for_optional_event_{a}"
             )
+
+    # One classroom per event constraint
+    # for a in A:
+    #     prob += (
+    #         lpSum([x[s][a] for s in S]) == 1,
+    #         f"Number_of_allocated_classrooms_for_event_{a}"
+    #     )
 
     # Resources/Preferences constraint
     for s in S:
@@ -205,10 +212,14 @@ def allocate_classrooms(classroom_list, event_list):
     prob.writeLP("src/common/allocation/ClassroomAllocationProblem.lp")
 
     # The problem is solved using PuLP's choice of Solver
-    prob.solve()
+    solver = get_solver('GUROBI')
+    prob.solve(solver)
 
     # The status of the solution is printed to the screen
     print("Solution status:", LpStatus[prob.status])
+
+    if(prob.status < 0):
+        raise Exception(f"Solution status: {LpStatus[prob.status]}")
 
     # Each of the variables is printed with it's resolved optimum value
     # for var in prob.variables():

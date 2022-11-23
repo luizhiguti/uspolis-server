@@ -17,5 +17,8 @@ class EventSchema(Schema):
   subscribers = fields.Int()
   pendings = fields.Int()
   preferences = fields.Nested(PreferencesSchema(unknown=EXCLUDE))
+  has_to_be_allocated = fields.Bool()
   classroom = fields.Str()
   building = fields.Str()
+  updated_at = fields.Str()
+  created_by = fields.Str()

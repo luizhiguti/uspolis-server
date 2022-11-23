@@ -1,11 +1,11 @@
 from flask import Blueprint, request
 from bson.json_util import dumps
-from marshmallow import EXCLUDE,INCLUDE, ValidationError
+from marshmallow import EXCLUDE, ValidationError
+from datetime import datetime
 
 from src.common.database import database
 from src.schemas.allocation_schema import AllocatorInputSchema, AllocatorOutputSchema
 from src.common.allocation.allocator import allocate_classrooms
-from src.common.mappers.classes_mapper import break_class_into_events
 
 event_blueprint = Blueprint("events", __name__, url_prefix="/api/events")
 
@@ -21,7 +21,8 @@ allocation_input_schema = AllocatorInputSchema(many=True, unknown=EXCLUDE)
 
 @event_blueprint.route("")
 def get_events():
-  result = events.find({}, { "_id" : 0 })
+  username = request.headers.get('username')
+  result = events.find({ "created_by" : username }, { "_id" : 0 })
   resultList = list(result)
 
   return dumps(resultList)
@@ -30,7 +31,8 @@ def get_events():
 @event_blueprint.route("allocate", methods=["PATCH"])
 def save_allocation():
   try:
-    classrooms_list = list(classrooms.find({ "building" : "Biênio" }, { "_id" : 0 }))
+    username = request.headers.get('username')
+    classrooms_list = list(classrooms.find({ "created_by" : username }, { "_id" : 0 }))
     events_list = list(events.find({}, { "_id" : 0 }))
 
     # parse date & time fields
@@ -43,10 +45,13 @@ def save_allocation():
 
     for event in allocation_events:
       allocation_output_schema_load = allocation_output_schema.load(event)
+      allocation_output_schema_load["updated_at"] = datetime.now().strftime("%d/%m/%Y %H:%M")
+
       query = {
         "class_code" : allocation_output_schema_load["class_code"],
         "subject_code" : allocation_output_schema_load["subject_code"],
-        "week_day" : allocation_output_schema_load["week_day"]
+        "week_day" : allocation_output_schema_load["week_day"],
+        "created_by" : username
       }
       result = events.update_one(
         query,
@@ -55,10 +60,7 @@ def save_allocation():
 
       allocated += result.matched_count
 
-    if allocated != len(events_list):
-      raise Exception(f"Matched {allocated} of {len(events_list)} events")
-
-    return ""
+    return dumps({ "allocated" : allocated , "unallocated" : len(events_list) - allocated })
 
   except ValidationError as err:
     return { "message" : err.messages }, 400
@@ -72,19 +74,24 @@ def edit_allocation(subject_code, class_code):
   try:
     week_days = request.json
     classroom = request.args["classroom"]
+    username = request.headers.get('username')
 
     query = {
         "subject_code" : subject_code,
         "class_code" : class_code,
-        "week_day": { "$in" : week_days }
+        "week_day": { "$in" : week_days },
+        "created_by" : username
       }
 
     result = events.update_many(query,
-      { "$set" : { "classroom" : classroom } }
+      { "$set" :
+        { "classroom" : classroom,
+          "updated_at" : datetime.now().strftime("%d/%m/%Y %H:%M") }
+      }
     )
 
     return dumps(result.matched_count)
 
   except Exception as ex:
     print(ex)
-    return { "message" : ex }, 500
+    return { "message" : str(ex) }, 500

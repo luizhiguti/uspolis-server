@@ -2,6 +2,7 @@ from flask import Blueprint, request
 from bson.json_util import dumps
 from marshmallow import EXCLUDE
 from pymongo.errors import PyMongoError
+from datetime import datetime
 
 from src.common.database import database
 from src.common.crawler import get_jupiter_class_infos
@@ -11,7 +12,7 @@ from src.common.mappers.classes_mapper import break_class_into_events
 
 class_blueprint = Blueprint("classes", __name__, url_prefix="/api/classes")
 
-classes = database["classes"]
+# classes = database["classes"]
 events = database["events"]
 
 # USING UPSERT
@@ -24,7 +25,9 @@ event_schema = EventSchema()
 
 @class_blueprint.route("", methods=["GET"])
 def get_all_classes():
+  username = request.headers.get('username')
   result = events.aggregate([
+    { "$match" : { "created_by" : username } },
     {
       "$group" : {
         "_id" : {"class_code" : "$class_code", "subject_code" : "$subject_code"},
@@ -37,7 +40,8 @@ def get_all_classes():
         "start_time" : {"$push" : "$start_time"},
         "end_time" : {"$push" : "$end_time"},
         "week_days": {"$push" : "$week_day"},
-        "preferences" : {"$first" : "$preferences"}
+        "preferences" : {"$first" : "$preferences"},
+        "has_to_be_allocated" : {"$first" : "$has_to_be_allocated"}
       }
     }
     ])
@@ -62,6 +66,9 @@ def create_many_classes():
 
         for event in events_list:
           event_schema_load = event_schema.load(event)
+          event_schema_load["updated_at"] = datetime.now().strftime("%d/%m/%Y %H:%M")
+          event_schema_load["created_by"] = request.headers.get("username")
+
           query = { "class_code" : event_schema_load["class_code"], "subject_code" : event_schema_load["subject_code"], "week_day" : event_schema_load["week_day"] }
           result = events.update_one(query, { "$set" : event_schema_load }, upsert=True)
           updated.append(event_schema_load["subject_code"]) if result.matched_count else inserted.append(event_schema_load["subject_code"])
@@ -74,7 +81,9 @@ def create_many_classes():
 
 @class_blueprint.route("/<subject_code>/<class_code>", methods=["DELETE"])
 def delete_by_subject_class_code(subject_code, class_code):
-  query = { "subject_code" : subject_code, "class_code" : class_code }
+  username = request.headers.get('username')
+  query = { "subject_code" : subject_code, "class_code" : class_code, "created_by" : username }
+
   try:
     result = events.delete_many(query).deleted_count
     if not result: raise PyMongoError(f"{subject_code} - {class_code} not found")
@@ -85,10 +94,16 @@ def delete_by_subject_class_code(subject_code, class_code):
 
 @class_blueprint.route("/preferences/<subject_code>/<class_code>", methods=["PATCH"])
 def update_preferences(subject_code, class_code):
-  query = { "subject_code" : subject_code, "class_code" : class_code }
+  username = request.headers.get('username')
+  query = { "subject_code" : subject_code, "class_code" : class_code, "created_by" : username }
+
   try:
-    schema_load = preferences_schema.load(request.json)
-    result = events.update_many(query, { "$set" : { "preferences": schema_load } })
+    preferences_schema_load = preferences_schema.load(request.json)
+    has_to_be_allocated = request.json["has_to_be_allocated"]
+
+    result = events.update_many(query,
+      { "$set" : { "preferences": preferences_schema_load, "has_to_be_allocated" : has_to_be_allocated } }
+    )
 
     return dumps(result.modified_count)
 
@@ -97,7 +112,9 @@ def update_preferences(subject_code, class_code):
 
 @class_blueprint.route("/<subject_code>/<class_code>", methods=["GET"])
 def get_preferences(subject_code, class_code):
-  query = { "subject_code" : subject_code, "class_code" : class_code }
+  username = request.headers.get('username')
+  query = { "subject_code" : subject_code, "class_code" : class_code, "created_by" : username }
+
   try:
     result = events.find_one(query, { "_id" : 0 })
 
@@ -108,17 +125,23 @@ def get_preferences(subject_code, class_code):
   except PyMongoError as err:
     return { "message" : err._message }
 
+  except Exception as ex:
+    print(ex)
+    return { "message" : str(ex) }, 500
+
 @class_blueprint.route("/<subject_code>/<class_code>", methods=["PATCH"])
 def edit_class(subject_code, class_code):
   try:
     class_events = request.json
     updated = 0
+    username = request.headers.get('username')
 
     for event in class_events:
       query = {
         "subject_code" : subject_code,
         "class_code" : class_code,
-        "week_day" : event["week_day_id"]
+        "week_day" : event["week_day_id"],
+        "created_by" : username
       }
 
       result = events.update_one(query,
@@ -126,7 +149,8 @@ def edit_class(subject_code, class_code):
           { "week_day" : event["week_day"],
             "start_time" : event["start_time"],
             "end_time": event["end_time"],
-            "professor" : event["professor"] }
+            "professor" : event["professor"],
+            "updated_at" : datetime.now().strftime("%d/%m/%Y %H:%M") }
         }
       )
       updated += result.matched_count
@@ -135,5 +159,5 @@ def edit_class(subject_code, class_code):
 
   except Exception as ex:
     print(ex)
-    return { "message" : ex }, 500
+    return { "message" : str(ex) }, 500
 

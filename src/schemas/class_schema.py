@@ -29,6 +29,3 @@ class ClassSchema(Schema):
   vacancies = ArraySumField(data_key="vagas")
   subscribers = ArraySumField(data_key="inscritos")
   pendings = ArraySumField(data_key="pendentes")
-  preferences = fields.Nested(PreferencesSchema)
-  has_to_be_allocated = fields.Bool()
-
