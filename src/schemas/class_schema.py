@@ -4,13 +4,12 @@ class ArraySumField(fields.Field):
   """
   fields to sum array values
   """
-  def _deserialize(self, value, attr, data, **kwargs):
+  def _deserialize(self, value, _, __, **___):
     return sum(value)
 
 
 class PreferencesSchema(Schema):
   building = fields.Str(required=True)
-  min_capacity = fields.Int()
   air_conditioning = fields.Bool()
   projector = fields.Bool()
   accessibility = fields.Bool()
@@ -30,4 +29,9 @@ class ClassSchema(Schema):
   vacancies = ArraySumField(data_key="vagas")
   subscribers = ArraySumField(data_key="inscritos")
   pendings = ArraySumField(data_key="pendentes")
-  preferences = fields.Nested(PreferencesSchema)
+
+
+class HasToBeAllocatedClassesSchema(Schema):
+  class_code = fields.Str()
+  subject_code = fields.Str()
+  has_to_be_allocated = fields.Bool()

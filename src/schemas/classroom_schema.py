@@ -9,3 +9,9 @@ class ClassroomSchema(Schema):
   projector = fields.Bool()
   accessibility = fields.Bool()
   updated_at = fields.Str()
+  created_by = fields.Str()
+
+class AvailableClassroomsQuerySchema(Schema):
+  week_day = fields.Str(required=True)
+  start_time = fields.Str(required=True)
+  end_time = fields.Str(required=True)

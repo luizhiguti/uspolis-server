@@ -5,20 +5,23 @@ from pymongo.errors import DuplicateKeyError, PyMongoError
 from datetime import datetime
 
 from src.common.database import database
-from src.schemas.classroom_schema import ClassroomSchema
+from src.schemas.classroom_schema import ClassroomSchema, AvailableClassroomsQuerySchema
 
 classroom_blueprint = Blueprint("classrooms", __name__, url_prefix="/api/classrooms")
 
 classrooms = database["classrooms"]
+events = database["events"]
 
 # classroom_name not unique
 # classrooms.create_index({ "classroom_name" : 1, "building" : 1 }, unique=True)
 
 classroom_schema = ClassroomSchema()
+available_classrooms_query_schema = AvailableClassroomsQuerySchema()
 
 @classroom_blueprint.route("")
 def get_all_classrooms():
-  result = classrooms.find({}, { "_id" : 0 })
+  username = request.headers.get('username')
+  result = classrooms.find({"created_by" : username}, { "_id" : 0 })
   resultList = list(result)
 
   return dumps(resultList)
@@ -31,6 +34,7 @@ def create_classroom():
     dict_request_body = request.json
 
     dict_request_body['updated_at'] = datetime.now().strftime("%d/%m/%Y %H:%M")
+    dict_request_body['created_by'] = request.headers.get('username')
 
     result = classrooms.insert_one(dict_request_body)
 
@@ -42,11 +46,16 @@ def create_classroom():
   except ValidationError as err:
     return { "message" : err.messages }, 400
 
+  except Exception as ex:
+    print(ex)
+    return { "message" : str(ex) }, 500
+
 
 @classroom_blueprint.route("/<name>", methods=["GET", "DELETE", "PUT"])
 def classroom_by_name(name):
-  query = { "classroom_name" : name }
   try:
+    username = request.headers.get('username')
+    query = { "classroom_name" : name, "created_by" : username }
     if request.method == "GET":
       result = classrooms.find_one(query, { "_id" : 0 })
 
@@ -57,6 +66,7 @@ def classroom_by_name(name):
       classroom_schema.load(request.json)
       dict_request_body = request.json
       dict_request_body['updated_at'] = datetime.now().strftime("%d/%m/%Y %H:%M")
+      dict_request_body['created_by'] = request.headers.get('username')
 
       update_set = {"$set" : dict_request_body }
       result = classrooms.update_one(query, update_set).modified_count
@@ -69,4 +79,37 @@ def classroom_by_name(name):
     return { "message" : err.messages }, 400
 
   except PyMongoError as err:
-    return { "message" : err._message }
+    return { "message" : err._message }, 400
+
+  except Exception as ex:
+    print(ex)
+    return { "message" : str(ex) }, 500
+
+@classroom_blueprint.route("/available")
+def get_available_classrooms():
+  try:
+    params = available_classrooms_query_schema.load(request.args)
+    unavailable_classrooms = events.find(
+      {
+        "week_day" : params["week_day"],
+        "start_time": { "$lte" : params["end_time"] },
+        "end_time" : { "$gte" : params["start_time"] }
+      },
+      { "classroom" : True , "_id" : False }
+      ).distinct("classroom")
+
+    username = request.headers.get('username')
+    classrooms_list = list(classrooms.find(
+      { "created_by" : username }, { "classroom_name" : True, "capacity" : True,  "_id" : False }
+      ))
+
+    available_classrooms = [c for c in classrooms_list if c["classroom_name"] not in unavailable_classrooms]
+
+    return dumps(available_classrooms)
+
+  except ValidationError as err:
+    return { "message" : err.messages }, 400
+
+  except Exception as ex:
+    print(ex)
+    return { "message" : str(ex) }, 500
