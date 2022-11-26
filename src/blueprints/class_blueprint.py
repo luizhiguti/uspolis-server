@@ -6,7 +6,7 @@ from datetime import datetime
 
 from src.common.database import database
 from src.common.crawler import get_jupiter_class_infos
-from src.schemas.class_schema import ClassSchema, PreferencesSchema
+from src.schemas.class_schema import ClassSchema, PreferencesSchema, HasToBeAllocatedClassesSchema
 from src.schemas.event_schema import EventSchema
 from src.common.mappers.classes_mapper import break_class_into_events
 
@@ -20,6 +20,7 @@ events = database["events"]
 
 class_schema = ClassSchema(unknown=EXCLUDE)
 preferences_schema = PreferencesSchema(unknown=EXCLUDE)
+has_to_be_allocated_schema = HasToBeAllocatedClassesSchema(many=True, unknown=EXCLUDE)
 event_schema = EventSchema()
 
 
@@ -161,3 +162,23 @@ def edit_class(subject_code, class_code):
     print(ex)
     return { "message" : str(ex) }, 500
 
+@class_blueprint.route("has-to-be-allocated", methods=["PATCH"])
+def update_has_to_be_allocated():
+  try:
+    username = request.headers.get('username')
+    has_to_be_allocated_schema_load = has_to_be_allocated_schema.load(request.json)
+    updated = 0
+
+    for cls in has_to_be_allocated_schema_load:
+      query = { "subject_code" : cls["subject_code"], "class_code" : cls["class_code"], "created_by" : username }
+      result = events.update_many(query, {
+        "$set" : { "has_to_be_allocated" : cls["has_to_be_allocated"] }
+        })
+
+      updated += result.matched_count
+
+    return dumps({ "updated" : updated })
+
+  except Exception as ex:
+    print(ex)
+    return { "message" : str(ex) }, 500

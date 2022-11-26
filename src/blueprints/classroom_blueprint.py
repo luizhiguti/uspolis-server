@@ -21,7 +21,6 @@ available_classrooms_query_schema = AvailableClassroomsQuerySchema()
 @classroom_blueprint.route("")
 def get_all_classrooms():
   username = request.headers.get('username')
-  print('username',username)
   result = classrooms.find({"created_by" : username}, { "_id" : 0 })
   resultList = list(result)
 
@@ -100,11 +99,11 @@ def get_available_classrooms():
       ).distinct("classroom")
 
     username = request.headers.get('username')
-    classrooms_list = classrooms.find(
-      { "created_by" : username }, { "classroom_name" : True, "_id" : False }
-      ).distinct("classroom_name")
+    classrooms_list = list(classrooms.find(
+      { "created_by" : username }, { "classroom_name" : True, "capacity" : True,  "_id" : False }
+      ))
 
-    available_classrooms = [c for c in classrooms_list if c not in unavailable_classrooms]
+    available_classrooms = [c for c in classrooms_list if c["classroom_name"] not in unavailable_classrooms]
 
     return dumps(available_classrooms)
 
