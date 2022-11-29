@@ -29,7 +29,7 @@ def get_events():
 
 
 @event_blueprint.route("allocate", methods=["PATCH"])
-def save_allocation():
+def save_new_allocation():
   try:
     username = request.headers.get('username')
     classrooms_list = list(classrooms.find({ "created_by" : username }, { "_id" : 0 }))
@@ -39,6 +39,9 @@ def save_allocation():
     allocation_input_schema_load = allocation_input_schema.load(events_list)
 
     print(f'Number of events: {len(events_list)}')
+
+    # clear previous allocation
+    events.update_many({}, { "$unset" : { "classroom" : True, "building" : True } })
 
     allocation_events = allocate_classrooms(classrooms_list, allocation_input_schema_load)
     allocated = 0
@@ -74,6 +77,7 @@ def edit_allocation(subject_code, class_code):
   try:
     week_days = request.json
     classroom = request.args["classroom"]
+    building = request.args["building"]
     username = request.headers.get('username')
 
     query = {
@@ -86,6 +90,7 @@ def edit_allocation(subject_code, class_code):
     result = events.update_many(query,
       { "$set" :
         { "classroom" : classroom,
+          "building" : building,
           "updated_at" : datetime.now().strftime("%d/%m/%Y %H:%M") }
       }
     )
