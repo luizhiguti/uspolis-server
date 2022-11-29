@@ -100,7 +100,7 @@ def get_available_classrooms():
 
     username = request.headers.get('username')
     classrooms_list = list(classrooms.find(
-      { "created_by" : username }, { "classroom_name" : True, "capacity" : True,  "_id" : False }
+      { "created_by" : username }, { "classroom_name" : True, "capacity" : True, "building" : True, "_id" : False }
       ))
 
     available_classrooms = [c for c in classrooms_list if c["classroom_name"] not in unavailable_classrooms]

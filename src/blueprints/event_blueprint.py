@@ -74,6 +74,7 @@ def edit_allocation(subject_code, class_code):
   try:
     week_days = request.json
     classroom = request.args["classroom"]
+    building = request.args["building"]
     username = request.headers.get('username')
 
     query = {
@@ -86,6 +87,7 @@ def edit_allocation(subject_code, class_code):
     result = events.update_many(query,
       { "$set" :
         { "classroom" : classroom,
+          "building" : building,
           "updated_at" : datetime.now().strftime("%d/%m/%Y %H:%M") }
       }
     )
