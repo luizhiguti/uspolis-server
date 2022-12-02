@@ -2,6 +2,7 @@ from flask import Blueprint, request
 from bson.json_util import dumps
 from marshmallow import ValidationError
 from pymongo.errors import DuplicateKeyError, PyMongoError
+from flasgger import swag_from
 
 from src.common.database import database
 from src.schemas.subject_schema import SubjectSchema
@@ -13,18 +14,12 @@ subjects.create_index("subject_code", unique=True)
 
 subject_schema = SubjectSchema()
 
+yaml_files = "../swagger/subjects"
 
 @subject_blueprint.route("", methods=["GET"])
+@swag_from(f"{yaml_files}/get_all_subjects.yml")
 def get_all_subjects():
-  """
-  Buscar disciplinas
-  ---
-  tags:
-    - Disciplinas
-  responses:
-    200:
-      description:
-  """
+
   result = subjects.find({}, { "_id" : 0 })
   resultList = list(result)
 
@@ -32,22 +27,8 @@ def get_all_subjects():
 
 
 @subject_blueprint.route("", methods=["POST"])
+@swag_from(f"{yaml_files}/create_subject.yml")
 def create_subject():
-  """
-  Cadastrar disciplina
-  ---
-  tags:
-    - Disciplinas
-  parameters:
-    - name: body
-      in: body
-      required: true
-      schema:
-        $ref: '#definitions/Subject'
-  responses:
-    200:
-      description:
-  """
   try:
     dict_request_body = request.json
     subject_schema.load(dict_request_body)
