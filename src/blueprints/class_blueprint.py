@@ -26,6 +26,21 @@ event_schema = EventSchema()
 
 @class_blueprint.route("", methods=["GET"])
 def get_all_classes():
+  """
+  Buscar turmas
+  ---
+  tags:
+    - Turmas
+  parameters:
+    - name: username
+      in: header
+      required: true
+  responses:
+    200:
+      description:
+      schema:
+        $ref : '#/definitions/Class'
+  """
   username = request.headers.get('username')
   result = events.aggregate([
     { "$match" : { "created_by" : username } },
@@ -53,6 +68,28 @@ def get_all_classes():
 
 @class_blueprint.route("many", methods=["POST"])
 def create_many_classes():
+  """
+  Cadastrar informações das turmas buscadas no Jupiterweb
+  ---
+  tags:
+    - Turmas
+  parameters:
+    - name: username
+      in: header
+      required: true
+    - name: body
+      in: body
+      required: true
+      schema:
+        type: array
+        example: [PCS3560, PCS3860]
+        items:
+          type: string
+
+  responses:
+    200:
+      description:
+  """
   try:
     subject_codes_list = request.json
     updated = []
@@ -82,6 +119,25 @@ def create_many_classes():
 
 @class_blueprint.route("/<subject_code>/<class_code>", methods=["DELETE"])
 def delete_by_subject_class_code(subject_code, class_code):
+  """
+  Excluir uma turma
+  ---
+  tags:
+    - Turmas
+  parameters:
+    - name: username
+      in: header
+      required: true
+    - name: subject_code
+      in: path
+      required: true
+    - name: class_code
+      in: path
+      required: true
+  responses:
+    200:
+      description:
+  """
   username = request.headers.get('username')
   query = { "subject_code" : subject_code, "class_code" : class_code, "created_by" : username }
 
@@ -95,6 +151,41 @@ def delete_by_subject_class_code(subject_code, class_code):
 
 @class_blueprint.route("/preferences/<subject_code>/<class_code>", methods=["PATCH"])
 def update_preferences(subject_code, class_code):
+  """
+  Editar preferências
+  ---
+  tags:
+    - Turmas
+  parameters:
+    - name: username
+      in: header
+      required: true
+    - name: subject_code
+      in: path
+      required: true
+    - name: class_code
+      in: path
+      required: true
+    - name: body
+      in: body
+      required: true
+      schema:
+        properties:
+          building:
+            type: string
+            required: true
+          air_conditioning:
+            type: boolean
+          projector:
+            type: boolean
+          accessibility:
+            type: boolean
+          has_to_be_allocated:
+            type: boolean
+  responses:
+    200:
+      description:
+  """
   username = request.headers.get('username')
   query = { "subject_code" : subject_code, "class_code" : class_code, "created_by" : username }
 
@@ -113,6 +204,27 @@ def update_preferences(subject_code, class_code):
 
 @class_blueprint.route("/<subject_code>/<class_code>", methods=["GET"])
 def get_preferences(subject_code, class_code):
+  """
+  Obter preferências de uma turma
+  ---
+  tags:
+    - Turmas
+  parameters:
+    - name: username
+      in: header
+      required: true
+    - name: subject_code
+      in: path
+      required: true
+    - name: class_code
+      in: path
+      required: true
+  responses:
+    200:
+      description:
+      schema:
+        $ref: '#/definitions/Preferences'
+  """
   username = request.headers.get('username')
   query = { "subject_code" : subject_code, "class_code" : class_code, "created_by" : username }
 
@@ -132,6 +244,43 @@ def get_preferences(subject_code, class_code):
 
 @class_blueprint.route("/<subject_code>/<class_code>", methods=["PATCH"])
 def edit_class(subject_code, class_code):
+  """
+  Editar informações de uma turma
+  ---
+  tags:
+    - Turmas
+  parameters:
+    - name: username
+      in: header
+      required: true
+    - name: subject_code
+      in: path
+      required: true
+    - name: class_code
+      in: path
+      required: true
+    - name: body
+      in: body
+      schema:
+        type: array
+        items:
+          properties:
+            week_day_id:
+              enum: [seg, ter, qua, qui, sex]
+              example: seg
+            week_day:
+              enum: [seg, ter, qua, qui, sex]
+              example: qui
+            start_time:
+              example: 00:00
+            end_time:
+              example: 00:00
+            professor:
+              example: Professor Pasquale
+  responses:
+    200:
+      description:
+  """
   try:
     class_events = request.json
     updated = 0
@@ -164,6 +313,25 @@ def edit_class(subject_code, class_code):
 
 @class_blueprint.route("has-to-be-allocated", methods=["PATCH"])
 def update_has_to_be_allocated():
+  """
+  Editar obrigatoriedade da turma em ser alocada
+  ---
+  tags:
+    - Turmas
+  parameters:
+    - name: username
+      in: header
+      required: true
+    - name: body
+      in: body
+      schema:
+        type: array
+        items:
+          $ref: '#/definitions/HasToBeAllocatedClasses'
+  responses:
+    200:
+      description:
+  """
   try:
     username = request.headers.get('username')
     has_to_be_allocated_schema_load = has_to_be_allocated_schema.load(request.json)

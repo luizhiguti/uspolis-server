@@ -20,6 +20,21 @@ available_classrooms_query_schema = AvailableClassroomsQuerySchema()
 
 @classroom_blueprint.route("")
 def get_all_classrooms():
+  """
+  Buscar salas
+  ---
+  tags:
+    - Salas
+  parameters:
+    - name: username
+      in: header
+      required: true
+  responses:
+    200:
+      description: Salas cadastradas pelo usuário
+      schema:
+        $ref: '#/definitions/Classroom'
+  """
   username = request.headers.get('username')
   result = classrooms.find({"created_by" : username}, { "_id" : 0 })
   resultList = list(result)
@@ -29,6 +44,24 @@ def get_all_classrooms():
 
 @classroom_blueprint.route("", methods=["POST"])
 def create_classroom():
+  """
+  Cadastro de salas
+  ---
+  tags:
+    - Salas
+  parameters:
+    - name: username
+      in: header
+      required: true
+    - name: body
+      in: body
+      required: true
+      schema:
+        $ref: '#/definitions/Classroom'
+  responses:
+    200:
+      description:
+  """
   try:
     classroom_schema.load(request.json)
     dict_request_body = request.json
@@ -53,6 +86,47 @@ def create_classroom():
 
 @classroom_blueprint.route("/<name>", methods=["GET", "DELETE", "PUT"])
 def classroom_by_name(name):
+  """
+  Alterar por sala
+  ---
+  tags:
+    - Salas
+  put:
+    parameters:
+      - name: username
+        in: header
+        required: true
+      - name: name
+        in: path
+        required: true
+        description: Nome da sala
+      - name: body
+        in: body
+        required: true
+        schema:
+          $ref: '#definitions/Classroom'
+  get:
+    parameters:
+      - name: username
+        in: header
+        required: true
+      - name: name
+        in: path
+        required: true
+        description: Nome da sala
+  delete:
+    parameters:
+      - name: username
+        in: header
+        required: true
+      - name: name
+        in: path
+        required: true
+        description: Nome da sala
+  responses:
+    200:
+      description:
+  """
   try:
     username = request.headers.get('username')
     query = { "classroom_name" : name, "created_by" : username }
@@ -87,6 +161,29 @@ def classroom_by_name(name):
 
 @classroom_blueprint.route("/available")
 def get_available_classrooms():
+  """
+  Buscar salas disponíveis em um horário
+  ---
+  tags:
+    - Salas
+  parameters:
+    - name: username
+      in: header
+      required: true
+    - name: start_time
+      in: query
+      required: true
+    - name: end_time
+      in: query
+      required: true
+    - name: week_day
+      in: query
+      required: true
+      enum: [seg, ter, qua, qui, sex]
+  responses:
+    200:
+      description:
+  """
   try:
     params = available_classrooms_query_schema.load(request.args)
     unavailable_classrooms = events.find(

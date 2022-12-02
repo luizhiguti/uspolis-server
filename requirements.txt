@@ -8,3 +8,6 @@ regex
 pulp
 matplotlib
 pandas
+apispec
+apispec_webframeworks
+flasgger

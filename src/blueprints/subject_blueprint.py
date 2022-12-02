@@ -16,6 +16,15 @@ subject_schema = SubjectSchema()
 
 @subject_blueprint.route("", methods=["GET"])
 def get_all_subjects():
+  """
+  Buscar disciplinas
+  ---
+  tags:
+    - Disciplinas
+  responses:
+    200:
+      description:
+  """
   result = subjects.find({}, { "_id" : 0 })
   resultList = list(result)
 
@@ -24,6 +33,21 @@ def get_all_subjects():
 
 @subject_blueprint.route("", methods=["POST"])
 def create_subject():
+  """
+  Cadastrar disciplina
+  ---
+  tags:
+    - Disciplinas
+  parameters:
+    - name: body
+      in: body
+      required: true
+      schema:
+        $ref: '#definitions/Subject'
+  responses:
+    200:
+      description:
+  """
   try:
     dict_request_body = request.json
     subject_schema.load(dict_request_body)

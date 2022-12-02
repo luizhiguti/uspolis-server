@@ -21,6 +21,19 @@ allocation_input_schema = AllocatorInputSchema(many=True, unknown=EXCLUDE)
 
 @event_blueprint.route("")
 def get_events():
+  """
+  Buscar eventos
+  ---
+  tags:
+    - Eventos
+  parameters:
+    - name: username
+      in: header
+      required: true
+  responses:
+    200:
+      description:
+  """
   username = request.headers.get('username')
   result = events.find({ "created_by" : username }, { "_id" : 0 })
   resultList = list(result)
@@ -30,6 +43,19 @@ def get_events():
 
 @event_blueprint.route("allocate", methods=["PATCH"])
 def save_new_allocation():
+  """
+  Alocar eventos
+  ---
+  tags:
+    - Eventos
+  parameters:
+    - name: username
+      in: header
+      required: true
+  responses:
+    200:
+      description:
+  """
   try:
     username = request.headers.get('username')
     classrooms_list = list(classrooms.find({ "created_by" : username }, { "_id" : 0 }))
@@ -74,6 +100,40 @@ def save_new_allocation():
 
 @event_blueprint.route("edit/<subject_code>/<class_code>", methods=["PATCH"])
 def edit_allocation(subject_code, class_code):
+  """
+  Editar evento alocado
+  ---
+  tags:
+    - Eventos
+  parameters:
+    - name: username
+      in: header
+      required: true
+    - name: subject_code
+      in: path
+      required: true
+    - name: class_code
+      in: path
+      required: true
+    - name: classroom
+      in: query
+      required: true
+    - name: building
+      in: query
+      required: true
+    - name: body
+      in: body
+      required: true
+      schema:
+        type: array
+        items:
+          type: string
+          enum: [seg, ter, qua, qui, sex]
+
+  responses:
+    200:
+      description:
+  """
   try:
     week_days = request.json
     classroom = request.args["classroom"]

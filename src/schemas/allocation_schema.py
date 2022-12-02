@@ -1,4 +1,5 @@
-from marshmallow import Schema, fields, post_load
+from marshmallow import post_load
+from flasgger import Schema, fields
 
 from src.schemas.class_schema import PreferencesSchema
 

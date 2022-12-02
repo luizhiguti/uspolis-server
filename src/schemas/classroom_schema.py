@@ -1,4 +1,5 @@
-from marshmallow import Schema, fields
+# from marshmallow import Schema, fields
+from flasgger import Schema, fields
 
 class ClassroomSchema(Schema):
   classroom_name = fields.Str()
