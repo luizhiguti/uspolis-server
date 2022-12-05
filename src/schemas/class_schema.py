@@ -1,4 +1,4 @@
-from marshmallow import Schema, fields
+from flasgger import Schema, fields
 
 class ArraySumField(fields.Field):
   """

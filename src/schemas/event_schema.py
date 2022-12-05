@@ -1,4 +1,6 @@
-from marshmallow import Schema, fields, EXCLUDE
+from marshmallow import EXCLUDE
+from flasgger import Schema, fields
+
 
 from src.schemas.class_schema import PreferencesSchema
 
