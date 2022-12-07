@@ -45,7 +45,8 @@ def get_all_classes():
         "end_time" : {"$push" : "$end_time"},
         "week_days": {"$push" : "$week_day"},
         "preferences" : {"$first" : "$preferences"},
-        "has_to_be_allocated" : {"$first" : "$has_to_be_allocated"}
+        "has_to_be_allocated" : {"$first" : "$has_to_be_allocated"},
+        "subscribers" : {"$first" : "$subscribers"}
       }
     }
     ])
@@ -159,6 +160,7 @@ def edit_class(subject_code, class_code):
             "start_time" : event["start_time"],
             "end_time": event["end_time"],
             "professor" : event["professor"],
+            "subscribers": event["subscribers"],
             "updated_at" : datetime.now().strftime("%d/%m/%Y %H:%M") }
         }
       )
