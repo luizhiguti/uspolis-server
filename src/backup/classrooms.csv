@@ -42,28 +42,28 @@ _id,accessibility,air_conditioning,building,capacity,classroom_name,created_by,f
 63629088e2d45a83eecada61,true,true,Produção,100,D2 116 e D1 007,,0,false,13/03/2018 20:53
 63629088e2d45a83eecada62,true,true,Prod/Bie,100,D2 014 e C2-06,,0,false,13/03/2018 21:29
 63629088e2d45a83eecada63,true,true,Elétrica,50,LabSoft,,0,false,13/03/2018 22:52
-63629088e2d45a83eecada65,false,false,Biênio,100,CT-04,luizhiguti,0,false,11/11/2022 20:11
-63629088e2d45a83eecada66,false,false,Biênio,100,C1-03,luizhiguti,0,false,30/07/2018 23:02
-63629088e2d45a83eecada67,false,false,Biênio,100,C1-04,luizhiguti,0,false,30/07/2018 23:02
-63629088e2d45a83eecada68,false,false,Biênio,100,C1-05,luizhiguti,0,false,30/07/2018 23:02
-63629088e2d45a83eecada69,false,false,Biênio,100,C1-09,luizhiguti,0,false,30/07/2018 23:03
-63629088e2d45a83eecada6a,false,false,Biênio,100,C2-01,luizhiguti,0,false,30/07/2018 23:03
-63629088e2d45a83eecada6b,false,false,Biênio,100,C2-02,luizhiguti,0,false,30/07/2018 23:03
-63629088e2d45a83eecada6c,false,false,Biênio,100,C2-03,luizhiguti,0,false,30/07/2018 23:03
-63629088e2d45a83eecada6d,false,false,Biênio,100,C2-04,luizhiguti,0,false,30/07/2018 23:04
-63629088e2d45a83eecada6e,false,false,Biênio,100,C2-05,luizhiguti,0,false,30/07/2018 23:04
-63629088e2d45a83eecada6f,false,false,Biênio,100,C2-06,luizhiguti,0,false,30/07/2018 23:04
-63629088e2d45a83eecada70,false,false,Biênio,100,C2-07,luizhiguti,0,false,30/07/2018 23:04
-63629088e2d45a83eecada71,false,false,Biênio,100,C2-08,luizhiguti,0,false,30/07/2018 23:04
-63629088e2d45a83eecada72,false,false,Biênio,100,C2-09,luizhiguti,0,false,30/07/2018 23:05
-63629088e2d45a83eecada73,false,false,Biênio,100,C2-10,luizhiguti,0,false,30/07/2018 23:05
-63629088e2d45a83eecada74,false,false,Biênio,100,C2-13,luizhiguti,0,false,30/07/2018 23:06
-63629088e2d45a83eecada75,false,false,Biênio,100,A1-01,luizhiguti,0,false,30/07/2018 23:06
-63629088e2d45a83eecada76,false,false,Biênio,100,A1-02,luizhiguti,0,false,30/07/2018 23:06
-63629088e2d45a83eecada77,false,false,Biênio,100,A1-03,luizhiguti,0,false,30/07/2018 23:06
-63629088e2d45a83eecada78,false,false,Biênio,100,A1-04,luizhiguti,0,false,30/07/2018 23:06
-63629088e2d45a83eecada79,false,false,Biênio,100,A1-05,luizhiguti,0,false,30/07/2018 23:06
-63629088e2d45a83eecada7a,false,false,Biênio,100,A1-06,luizhiguti,0,false,30/07/2018 23:06
+63629088e2d45a83eecada65,false,false,Biênio,75,CT-04,luizhiguti,0,false,07/12/2022 12:40
+63629088e2d45a83eecada66,true,true,Biênio,80,C1-03,luizhiguti,1,true,07/12/2022 14:20
+63629088e2d45a83eecada67,false,false,Biênio,80,C1-04,luizhiguti,1,false,07/12/2022 12:43
+63629088e2d45a83eecada68,false,false,Biênio,80,C1-05,luizhiguti,1,false,07/12/2022 12:44
+63629088e2d45a83eecada69,false,false,Biênio,80,C1-09,luizhiguti,1,false,07/12/2022 12:44
+63629088e2d45a83eecada6a,false,false,Biênio,80,C2-01,luizhiguti,2,false,07/12/2022 12:44
+63629088e2d45a83eecada6b,false,false,Biênio,80,C2-02,luizhiguti,2,false,07/12/2022 12:44
+63629088e2d45a83eecada6c,false,false,Biênio,80,C2-03,luizhiguti,2,false,07/12/2022 12:44
+63629088e2d45a83eecada6d,false,false,Biênio,80,C2-04,luizhiguti,2,false,07/12/2022 12:44
+63629088e2d45a83eecada6e,false,false,Biênio,80,C2-05,luizhiguti,2,false,07/12/2022 12:44
+63629088e2d45a83eecada6f,false,false,Biênio,80,C2-06,luizhiguti,2,false,07/12/2022 12:44
+63629088e2d45a83eecada70,false,false,Biênio,80,C2-07,luizhiguti,2,false,07/12/2022 12:44
+63629088e2d45a83eecada71,false,false,Biênio,80,C2-08,luizhiguti,2,false,07/12/2022 12:44
+63629088e2d45a83eecada72,false,false,Biênio,80,C2-09,luizhiguti,2,false,07/12/2022 12:44
+63629088e2d45a83eecada73,false,false,Biênio,80,C2-10,luizhiguti,2,false,07/12/2022 12:45
+63629088e2d45a83eecada74,false,false,Biênio,80,C2-13,luizhiguti,2,false,07/12/2022 12:45
+63629088e2d45a83eecada75,false,false,Biênio,98,A1-01,luizhiguti,1,false,07/12/2022 14:59
+63629088e2d45a83eecada76,false,false,Biênio,98,A1-02,luizhiguti,1,false,07/12/2022 14:59
+63629088e2d45a83eecada77,false,false,Biênio,95,A1-03,luizhiguti,1,false,07/12/2022 14:57
+63629088e2d45a83eecada78,false,false,Biênio,95,A1-04,luizhiguti,1,false,07/12/2022 14:57
+63629088e2d45a83eecada79,false,false,Biênio,95,A1-05,luizhiguti,1,false,07/12/2022 14:57
+63629088e2d45a83eecada7a,false,false,Biênio,95,A1-06,luizhiguti,1,false,07/12/2022 14:57
 63629088e2d45a83eecada7b,false,false,Produção,57,D2 012,,0,false,31/07/2018 22:02
 63629088e2d45a83eecada7c,false,false,Eng. Química,100,B18t-2/4,,0,false,01/08/2018 20:33
 63629088e2d45a83eecada7d,false,false,Eng. Química,100,B18t-6/8,,0,false,01/08/2018 20:33
@@ -133,5 +133,5 @@ _id,accessibility,air_conditioning,building,capacity,classroom_name,created_by,f
 63629088e2d45a83eecadabf,false,false,Minas e Metal,0,T3,,0,false,24/02/2019 11:55
 63629088e2d45a83eecadac0,false,false,Minas e Metal,0,T5,,0,false,24/02/2019 12:13
 63629088e2d45a83eecadac1,false,false,Metal,0,Anf Metal,,0,false,26/02/2019 18:11
-6362910064b35453921ca994,false,false,Biênio,50,C1-01,luizhiguti,1,true,02/11/2022 12:47
+6362910064b35453921ca994,false,false,Biênio,75,C1-01,luizhiguti,1,true,07/12/2022 14:53
 638926c66ec8c656b8c3bad1,true,true,string,0,string,swagger,0,true,01/12/2022 19:12
